@@ -26,7 +26,7 @@ export const tiles: TileData[] = [
   {
     id: 0,
     name: "START",
-    prop: "🚀 START",
+    prop: "START",
     type: "start",
     
     region: "—",
@@ -36,7 +36,7 @@ export const tiles: TileData[] = [
   {
     id: 1,
     name: "Solar Farms",
-    prop: "☀️ Solar Farms",
+    prop: "Solar Farms",
     type: "property",
     sdgno: "SDG 7",
     region: "Sub-Saharan Africa",
@@ -47,7 +47,7 @@ export const tiles: TileData[] = [
   {
     id: 2,
     name: "Girls Education",
-    prop: "📖 Girls Education",
+    prop: "Girls Education",
     type: "property",
     sdgno: "SDG 4&5",
     region: "South Asia",
@@ -57,7 +57,7 @@ export const tiles: TileData[] = [
   {
     id: 3,
     name: "Headlines",
-    prop: "🃏 Global Headlines",
+    prop: "Global Headlines",
     type: "chance",
     
     region: "—",
@@ -68,7 +68,7 @@ export const tiles: TileData[] = [
   {
     id: 4,
     name: "Water Pipeline",
-    prop: "💧 Clean Water Pipeline",
+    prop: "Clean Water Pipeline",
     type: "property",
     sdgno: "SDG 6",
     region: "Sub-Saharan Africa",
@@ -78,7 +78,7 @@ export const tiles: TileData[] = [
   {
     id: 5,
     name: "Green Jobs",
-    prop: "🏭 Green Jobs Program",
+    prop: "Green Jobs Program",
     type: "property",
     sdgno: "SDG 8",
     region: "Industrial Regions",
@@ -88,7 +88,7 @@ export const tiles: TileData[] = [
   {
     id: 6,
     name: "Headlines",
-    prop: "🃏 Global Headlines",
+    prop: "Global Headlines",
     type: "property",
     
     region: "—",
@@ -99,7 +99,7 @@ export const tiles: TileData[] = [
   {
     id: 7,
     name: "Healthcare",
-    prop: "🏥 Universal Healthcare",
+    prop: "Universal Healthcare",
     type: "property",
     sdgno: "SDG 3",
     region: "Latin America",
@@ -109,7 +109,7 @@ export const tiles: TileData[] = [
   {
     id: 8,
     name: "Ocean Cleanup",
-    prop: "🌊 Ocean Cleanup",
+    prop: "Ocean Cleanup",
     type: "property",
     sdgno: "SDG 14",
     region: "Pacific Islands",
@@ -120,7 +120,7 @@ export const tiles: TileData[] = [
   {
     id: 9,
     name: "People's Voice",
-    prop: "🗣️ People's Voice",
+    prop: "People's Voice",
     type: "property",
     
     region: "—",
@@ -131,7 +131,7 @@ export const tiles: TileData[] = [
   {
     id: 10,
     name: "Tipping Point",
-    prop: "🌡️ Climate Tipping Point",
+    prop: "Climate Tipping Point",
     type: "jail",
     
     region: "—",
@@ -141,7 +141,7 @@ export const tiles: TileData[] = [
   {
     id: 11,
     name: "Reforestation",
-    prop: "🌲 Amazon Reforestation",
+    prop: "Amazon Reforestation",
     type: "property",
     sdgno: "SDG 15",
     region: "Brazil",
@@ -152,7 +152,7 @@ export const tiles: TileData[] = [
   {
     id: 12,
     name: "Anti-Corruption",
-    prop: "⚖️ Anti-Corruption Courts",
+    prop: "Anti-Corruption Courts",
     type: "property",
     sdgno: "SDG 16",
     region: "South America",
@@ -162,7 +162,7 @@ export const tiles: TileData[] = [
   {
     id: 13,
     name: "Inclusion",
-    prop: "♿ Disability Inclusion",
+    prop: "Disability Inclusion",
     type: "property",
     sdgno: "SDG 10",
     region: "Southeast Asia",
@@ -173,7 +173,7 @@ export const tiles: TileData[] = [
   {
     id: 14,
     name: "Rural Internet",
-    prop: "📡 Rural Internet",
+    prop: "Rural Internet",
     type: "property",
     sdgno: "SDG 9",
     region: "Central Asia",
@@ -184,7 +184,7 @@ export const tiles: TileData[] = [
   {
     id: 15,
     name: "Vaccines",
-    prop: "🧬 Vaccine Distribution",
+    prop: "Vaccine Distribution",
     type: "property",
     sdgno: "SDG 3",
     region: "South Asia",
@@ -194,7 +194,7 @@ export const tiles: TileData[] = [
   {
     id: 16,
     name: "People's Voice",
-    prop: "🗣️ People's Voice",
+    prop: "People's Voice",
     type: "property",
     
     region: "—",
@@ -205,7 +205,7 @@ export const tiles: TileData[] = [
   {
     id: 17,
     name: "Headlines",
-    prop: "🃏 Global Headlines",
+    prop: "Global Headlines",
     type: "treasure",
     
     region: "—",
@@ -215,7 +215,7 @@ export const tiles: TileData[] = [
   {
     id: 18,
     name: "Uni Access",
-    prop: "🎓 Free University Access",
+    prop: "Free University Access",
     type: "property",
     sdgno: "SDG 4",
     region: "Latin America",
@@ -226,7 +226,7 @@ export const tiles: TileData[] = [
   {
     id: 19,
     name: "Climate Fund",
-    prop: "🌐 Global Climate Fund",
+    prop: "Global Climate Fund",
     type: "property",
     sdgno: "SDG 17",
     region: "Worldwide",
@@ -237,7 +237,7 @@ export const tiles: TileData[] = [
   {
     id: 20,
     name: "UN Summit",
-    prop: "🏦 UN Summit",
+    prop: "UN Summit",
     type: "parking",
     
     region: "—",
@@ -247,7 +247,7 @@ export const tiles: TileData[] = [
   {
     id: 21,
     name: "Ice Monitoring",
-    prop: "❄️ Arctic Ice Monitoring",
+    prop: "Arctic Ice Monitoring",
     type: "property",
     sdgno: "SDG 13",
     region: "Norway",
@@ -258,7 +258,7 @@ export const tiles: TileData[] = [
   {
     id: 22,
     name: "Headlines",
-    prop: "🃏 Global Headlines",
+    prop: "Global Headlines",
     type: "treasure",
     
     region: "—",
@@ -268,7 +268,7 @@ export const tiles: TileData[] = [
   {
     id: 23,
     name: "Food Banks",
-    prop: "🍽️ Food Bank Infrastructure",
+    prop: "Food Bank Infrastructure",
     type: "property",
     sdgno: "SDG 2",
     region: "Eastern Europe",
@@ -279,7 +279,7 @@ export const tiles: TileData[] = [
   {
     id: 24,
     name: "Women's Fund",
-    prop: "👩‍💼 Women Entrepreneur Fund",
+    prop: "Women Entrepreneur Fund",
     type: "property",
     sdgno: "SDG 5",
     region: "Middle East",
@@ -290,7 +290,7 @@ export const tiles: TileData[] = [
   {
     id: 25,
     name: "Wind Energy",
-    prop: "💨 Wind Energy Grid",
+    prop: "Wind Energy Grid",
     type: "property",
     sdgno: "SDG 7",
     region: "North Sea",
@@ -300,7 +300,7 @@ export const tiles: TileData[] = [
   {
     id: 26,
     name: "Electric Transport",
-    prop: "🚇 Electric Transport",
+    prop: "Electric Transport",
     type: "property",
     sdgno: "SDG 11",
     region: "South America",
@@ -311,7 +311,7 @@ export const tiles: TileData[] = [
   {
     id: 27,
     name: "Headlines",
-    prop: "🃏 Global Headlines",
+    prop: "Global Headlines",
     type: "treasure",
     
     region: "—",
@@ -322,7 +322,7 @@ export const tiles: TileData[] = [
   {
     id: 28,
     name: "Coral Reefs",
-    prop: "🪸 Coral Reef Restoration",
+    prop: "Coral Reef Restoration",
     type: "property",
     sdgno: "SDG 14",
     region: "Australia",
@@ -332,7 +332,7 @@ export const tiles: TileData[] = [
   {
     id: 29,
     name: "Refugee Education",
-    prop: "📚 Refugee Education",
+    prop: "Refugee Education",
     type: "property",
     sdgno: "SDG 4",
     region: "Europe",
@@ -343,7 +343,7 @@ export const tiles: TileData[] = [
   {
     id: 30,
     name: "Economic Boom",
-    prop: "💸 Economic Boom",
+    prop: "Economic Boom",
     type: "goToJail",
     
     region: "—",
@@ -353,7 +353,7 @@ export const tiles: TileData[] = [
   {
     id: 31,
     name: "Mental Health",
-    prop: "🧠 Mental Health Clinics",
+    prop: "Mental Health Clinics",
     type: "property",
     sdgno: "SDG 3",
     region: "North America",
@@ -364,7 +364,7 @@ export const tiles: TileData[] = [
   {
     id: 32,
     name: "Innovation Hubs",
-    prop: "💡 Tech Innovation Hubs",
+    prop: "Tech Innovation Hubs",
     type: "property",
     sdgno: "SDG 9",
     region: "Southeast Asia",
@@ -374,7 +374,7 @@ export const tiles: TileData[] = [
   {
     id: 33,
     name: "Open Data",
-    prop: "📊 Open Data Platforms",
+    prop: "Open Data Platforms",
     type: "property",
     sdgno: "SDG 16",
     region: "Africa",
@@ -385,7 +385,7 @@ export const tiles: TileData[] = [
   {
     id: 34,
     name: "Carbon Capture",
-    prop: "🌫️ Carbon Capture Plant",
+    prop: "Carbon Capture Plant",
     type: "property",
     sdgno: "SDG 13",
     region: "Germany",
@@ -395,7 +395,7 @@ export const tiles: TileData[] = [
   {
     id: 35,
     name: "People's Voice",
-    prop: "🗣️ People's Voice",
+    prop: "People's Voice",
     type: "airport",
    
     region: "—",
@@ -405,7 +405,7 @@ export const tiles: TileData[] = [
   {
     id: 36,
     name: "Digital Schools",
-    prop: "🏫 Rural Digital Schools",
+    prop: "Rural Digital Schools",
     type: "property",
     sdgno: "SDG 4",
     region: "East Africa",
@@ -416,7 +416,7 @@ export const tiles: TileData[] = [
   {
     id: 37,
     name: "Microfinance",
-    prop: "🌾 Microfinance for Farmers",
+    prop: "Microfinance for Farmers",
     type: "property",
     sdgno: "SDG 1&2",
     region: "West Africa",
@@ -426,7 +426,7 @@ export const tiles: TileData[] = [
   {
     id: 38,
     name: "Peace Centers",
-    prop: "🕊️ Peace Mediation Centers",
+    prop: "Peace Mediation Centers",
     type: "property",
     sdgno: "SDG 16",
     region: "Conflict Zones",
@@ -437,7 +437,7 @@ export const tiles: TileData[] = [
   {
     id: 39,
     name: "Sanitation",
-    prop: "🚿 Sanitation for All",
+    prop: "Sanitation for All",
     type: "property",
     sdgno: "SDG 6",
     region: "Southeast Asia",

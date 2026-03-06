@@ -14,17 +14,14 @@ export default function SDGBar({ room }: Props) {
     ];
 
     return (
-        <div className="flex flex-col gap-3 mt-6">
+        <div className="flex justify-between items-end gap-2 mt-4 h-32">
             {bars.map((b) => (
-                <div key={b.label}>
-                    <div className="flex justify-between font-bold mb-1">
-                        <span>{b.label}</span>
-                        <span>{b.value}/100</span>
-                    </div>
-                    <div className="w-full h-6 bg-[#eee] border-[3px] border-black rounded overflow-hidden">
+                <div key={b.label} className="flex flex-col items-center h-full w-full justify-end">
+                    <div className="text-[10px] font-bold mb-1">{b.value}</div>
+                    <div className="w-6 bg-[#eee] border-2 border-black rounded overflow-hidden h-full flex items-end">
                         <div
-                            className="h-full border-r-[3px] border-black transition-[width] duration-300"
-                            style={{ width: `${b.value}%`, background: b.color }}
+                            className="w-full border-t-2 border-black transition-[height] duration-300"
+                            style={{ height: `${b.value}%`, background: b.color }}
                         />
                     </div>
                 </div>

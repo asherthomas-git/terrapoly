@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Globe, Sparkles, Rocket } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 import type { GameState } from "../../hooks/useGameSocket";
 import { Socket } from "socket.io-client";
@@ -54,7 +55,7 @@ export default function Lobby({ socket, gameState }: LobbyProps) {
 
     return (
         <div className="flex flex-col items-center justify-center h-full font-nunito text-black">
-            <h1 className="text-[48px] mb-5">🌍 Terra 2030</h1>
+            <h1 className="text-white text-[48px] mb-5 mr-3 flex items-center justify-center gap-3">Terrapoly<Globe size={48} />2030</h1>
 
             {!inRoom ? (
                 <div className="bg-[#fdfbf7] border-4 border-black shadow-[8px_8px_0px_#000] p-8 rounded-lg w-[400px] flex flex-col gap-4">
@@ -71,7 +72,7 @@ export default function Lobby({ socket, gameState }: LobbyProps) {
                         className="p-3 text-base border-[3px] border-black rounded outline-none bg-[#4ade80] font-bold cursor-pointer shadow-[4px_4px_0px_#000] transition-transform duration-100 hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_#000]"
                         onClick={handleCreate}
                     >
-                        ✨ Create New Room
+                        <Sparkles className="inline-block mr-2" size={20} /> Create New Room
                     </button>
 
                     <div className="flex items-center my-2">
@@ -132,7 +133,7 @@ export default function Lobby({ socket, gameState }: LobbyProps) {
                         className="p-3 text-[20px] border-[3px] border-black rounded outline-none bg-[#ff90e8] font-bold cursor-pointer shadow-[4px_4px_0px_#000] transition-transform duration-100 hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_#000]"
                         onClick={handleStartGame}
                     >
-                        Start Game 🚀
+                        Start Game <Rocket className="inline-block ml-2" size={24} />
                     </button>
                 </div>
             )}

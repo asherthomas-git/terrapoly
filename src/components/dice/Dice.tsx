@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Dices } from "lucide-react";
 
 type Props = {
   onRoll: (total: number) => void;
@@ -65,7 +66,7 @@ export default function Dice({ onRoll, disabled }: Props) {
 
     return (
       <div
-        className="absolute w-[60px] h-[60px] bg-[#fdfdfd] rounded-xl shadow-[inset_0_0_0_1px_#ddd,inset_0_0_15px_rgba(0,0,0,0.1)] backface-hidden p-2 box-border"
+        className="absolute w-[60px] h-[60px] bg-[#fdfdfd] rounded-xl shadow-[inset_0_0_0_1px_#ddd,inset_0_0_15px_rgba(0,0,0,0.1)] [backface-visibility:hidden] p-2 box-border"
         style={{ transform }}
       >
         <div className="grid grid-cols-3 grid-rows-3 w-full h-full">
@@ -82,7 +83,7 @@ export default function Dice({ onRoll, disabled }: Props) {
   const Cube = ({ value }: { value: number }) => (
     <div className="w-[60px] h-[60px] mx-auto perspective-[600px]">
       <div
-        className="w-full h-full relative transition-transform duration-150 ease-out transform-style-3d"
+        className="w-full h-full relative transition-[transform] duration-150 ease-out [transform-style:preserve-3d]"
         style={{ transform: getRotation(value) }}
       >
         <Face value={1} transform="rotateY(0deg) translateZ(30px)" />
@@ -108,8 +109,8 @@ export default function Dice({ onRoll, disabled }: Props) {
         className={`w-[140px] mt-[30px] py-2 px-6 text-base font-normal text-white rounded transition-all duration-200 bg-[rgba(74,146,240,0.49)] backdrop-blur-md border border-[rgba(35,90,178,0.15)] shadow-[0_4px_20px_rgba(0,0,0,0.4)] font-nunito ${rolling || disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"
           }`}
       >
-        <i className="fa-solid fa-dice text-white" />
-        {rolling ? " Rolling..." : " Roll Dice"}
+        <Dices className="inline-block mr-2 -mt-1 align-middle" size={20} />
+        {rolling ? "Rolling..." : "Roll Dice"}
       </button>
     </div>
   );
