@@ -2,15 +2,16 @@ import { useState } from "react";
 
 type Props = {
   onRoll: (total: number) => void;
+  disabled?: boolean; // ✅ NEW
 };
 
-export default function Dice({ onRoll }: Props) {
+export default function Dice({ onRoll, disabled }: Props) {
   const [dice1, setDice1] = useState(1);
   const [dice2, setDice2] = useState(1);
   const [rolling, setRolling] = useState(false);
 
   const rollDice = () => {
-    if (rolling) return;
+    if (rolling || disabled) return; // ✅ UPDATED
 
     console.log("🎲 Roll button clicked");
     setRolling(true);
@@ -35,7 +36,7 @@ export default function Dice({ onRoll }: Props) {
 
         console.log(`🎲 Final Dice: ${final1} + ${final2} = ${total}`);
 
-        onRoll(total); // ✅ important for player movement
+        onRoll(total);
       }
     }, 100);
   };
@@ -97,14 +98,16 @@ export default function Dice({ onRoll }: Props) {
 
       <button
         onClick={rollDice}
-        disabled={rolling}
+        disabled={rolling || disabled} // ✅ UPDATED
         style={{
           ...buttonStyle,
-          opacity: rolling ? 0.6 : 1,
-          cursor: rolling ? "not-allowed" : "pointer"
+          width: "140px",
+          opacity: rolling || disabled ? 0.6 : 1, // ✅ UPDATED
+          cursor: rolling || disabled ? "not-allowed" : "pointer"
         }}
       >
-        {rolling ? "Rolling..." : "Roll Dice"}
+        <i className="fa-solid fa-dice" style={{ color: "white" }} />
+        {rolling ? " Rolling..." : " Roll Dice"}
       </button>
     </div>
   );
@@ -163,7 +166,7 @@ const dotStyle: React.CSSProperties = {
 
 const buttonStyle: React.CSSProperties = {
   width: "120px",
-  marginTop: "50px",
+  marginTop: "30px",
   padding: "8px 24px",
   fontSize: "16px",
   fontWeight: "normal",

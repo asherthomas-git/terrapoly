@@ -24,8 +24,8 @@ export default function Tile({ tile, data }: Props) {
   const pricePosition: Record<string, React.CSSProperties> = {
     bottom: { bottom: 6, left: "50%", transform: "translateX(-50%)" },
     top: { top: 6, left: "50%", transform: "translateX(-50%)" },
-    left: { left: 6, top: "50%", transform: "translateY(-50%) rotate(90deg)" },
-    right: { right: 6, top: "50%", transform: "translateY(-50%) rotate(-90deg)" },
+    left: { left: -8, top: "50%", transform: "translateY(-50%) rotate(90deg)" },
+    right: { right: -8, top: "50%", transform: "translateY(-50%) rotate(-90deg)" },
   };
 
   const namePosition: Record<string, React.CSSProperties> = {
@@ -96,11 +96,13 @@ export default function Tile({ tile, data }: Props) {
       )}
 
       {/* PRICE TAG */}
-      {isProperty && data.price && (
+      {isProperty && data.sdgno && (
         <div
           style={{
             color: "#00ffaa",
             position: "absolute",
+            width: 36,
+            textAlign: "center",
             fontSize: 10,
             fontFamily: "Nunito",
             opacity: 0.85,
@@ -108,9 +110,10 @@ export default function Tile({ tile, data }: Props) {
             padding: "2px 6px",
             borderRadius: 6,
             ...pricePosition[tile.side],
+
           }}
         >
-          ${data.price}
+          {data.sdgno}
         </div>
       )}
 
