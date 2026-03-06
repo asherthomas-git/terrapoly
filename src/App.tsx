@@ -1,12 +1,20 @@
 import Board from "./components/Board/Board"
 import { BOARD_SIZE } from "./game/board/constants"
 
+
+
+import PropertyPanel from "./components/panels/PropertyPanel"
+import LogPanel from "./components/panels/LogPanel"
+import GlobalScorePanel from "./components/panels/GlobalScorePanel"
+import CurrentScorePanel from "./components/panels/CurrentScorePanel"
+
 export default function App() {
   return (
     <div style={pageLayout}>
       {/* LEFT PANEL */}
       <div style={sidePanelStyle}>
-        {/* Left panel content here */}
+        <PropertyPanel />
+        <LogPanel />
       </div>
 
       {/* GAME BOARD */}
@@ -14,7 +22,8 @@ export default function App() {
 
       {/* RIGHT PANEL */}
       <div style={sidePanelStyle}>
-        {/* Right panel content here */}
+        <GlobalScorePanel />
+        <CurrentScorePanel />
       </div>
     </div>
   )
@@ -22,18 +31,18 @@ export default function App() {
 
 const pageLayout: React.CSSProperties = {
   display: "flex",
-  justifyContent: "center",
-  
+  justifyContent: "space-around",
   alignItems: "center",
-  gap: "24px",        // space between panels and board
+  gap: "24px",
   padding: "20px"
 }
 
 const sidePanelStyle: React.CSSProperties = {
-  width: "360px",
+  width: "354px",
   height: BOARD_SIZE,
+  display: "flex",
+  flexDirection: "column",
 
-  /* optional styling */
   background: "rgba(29, 50, 80, 0.8)",
   backdropFilter: "blur(24px)",
   WebkitBackdropFilter: "blur(12px)",

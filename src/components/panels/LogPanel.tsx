@@ -1,0 +1,29 @@
+export default function LogPanel() {
+  return (
+    <div style={panelBottom}>
+      <div style={panelTitle}>LOG</div>
+    </div>
+  )
+}
+
+const panelBase: React.CSSProperties = {
+  background: "rgba(255,255,255,0.06)",
+  borderRadius: "12px",
+  border: "1px solid rgba(255,255,255,0.08)",
+  padding: "20px",
+  color: "white",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center"
+}
+
+const panelBottom: React.CSSProperties = {
+  ...panelBase,
+  flex: 1,
+  margin: "16px"
+}
+
+const panelTitle: React.CSSProperties = {
+  fontSize: "20px",
+  letterSpacing: "1px"
+}
