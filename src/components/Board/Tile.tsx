@@ -7,32 +7,32 @@ type Props = {
 };
 
 export default function Tile({ tile, data }: Props) {
-  let rotation = "rotate(0deg)";
+  let rotationClass = "rotate-0";
 
-  if (tile.side === "left") rotation = "rotate(90deg)";
-  if (tile.side === "right") rotation = "rotate(-90deg)";
+  if (tile.side === "left") rotationClass = "rotate-90";
+  if (tile.side === "right") rotationClass = "-rotate-90";
 
   // position the flag toward the inner edge of the board
-  const flagPosition: Record<string, React.CSSProperties> = {
-    bottom: { top: -10, left: "50%", transform: "translateX(-50%)" },
-    top: { bottom: -10, left: "50%", transform: "translateX(-50%)" },
-    left: { right: -10, top: "50%", transform: "translateY(-50%)" },
-    right: { left: -10, top: "50%", transform: "translateY(-50%)" },
+  const flagPositionClass: Record<string, string> = {
+    bottom: "-top-2.5 left-1/2 -translate-x-1/2",
+    top: "-bottom-2.5 left-1/2 -translate-x-1/2",
+    left: "-right-2.5 top-1/2 -translate-y-1/2",
+    right: "-left-2.5 top-1/2 -translate-y-1/2",
   };
 
   // position price tag toward outer edge of board
-  const pricePosition: Record<string, React.CSSProperties> = {
-    bottom: { bottom: 6, left: "50%", transform: "translateX(-50%)" },
-    top: { top: 6, left: "50%", transform: "translateX(-50%)" },
-    left: { left: -8, top: "50%", transform: "translateY(-50%) rotate(90deg)" },
-    right: { right: -8, top: "50%", transform: "translateY(-50%) rotate(-90deg)" },
+  const pricePositionClass: Record<string, string> = {
+    bottom: "bottom-1.5 left-1/2 -translate-x-1/2",
+    top: "top-1.5 left-1/2 -translate-x-1/2",
+    left: "-left-2 top-1/2 -translate-y-1/2 rotate-90",
+    right: "-right-2 top-1/2 -translate-y-1/2 -rotate-90",
   };
 
-  const namePosition: Record<string, React.CSSProperties> = {
-    bottom: { justifyContent: "flex-start", paddingTop: 32 },
-    top: { justifyContent: "flex-end", paddingBottom: 32 },
-    left: { justifyContent: "flex-start", paddingTop: 6 },
-    right: { justifyContent: "flex-start", paddingTop: 6 }
+  const namePositionClass: Record<string, string> = {
+    bottom: "justify-start pt-8",
+    top: "justify-end pb-8",
+    left: "justify-start pt-1.5",
+    right: "justify-start pt-1.5"
   };
 
   const isProperty = data.type === "property";
@@ -50,30 +50,28 @@ export default function Tile({ tile, data }: Props) {
     data.type === "goToJail" ||
     data.type === "parking";
 
+  const getTileColor = (cat?: string) => {
+    switch (cat) {
+      case "green": return "#4ade80";
+      case "yellow": return "#fde047";
+      case "blue": return "#60a5fa";
+      case "orange": return "#fb923c";
+      case "purple": return "#c084fc";
+      case "event": return "#ff90e8";
+      case "corner": return "#ffffff";
+      default: return "#e5e7eb";
+    }
+  };
+
   return (
     <div
+      className="absolute rounded-lg border-[3px] border-black shadow-[4px_4px_0px_#000] box-border flex items-center justify-center text-black font-bold overflow-visible"
       style={{
-        position: "absolute",
         left: tile.x,
         top: tile.y,
         width: tile.width,
         height: tile.height,
-        borderRadius: "12px",
-
-        background: "rgba(48, 86, 136, 0.64)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
-
-        border: "1px solid rgba(35, 90, 178, 0.15)",
-        boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
-
-        boxSizing: "border-box",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-
-        color: "white",
-        overflow: "visible",
+        background: getTileColor(data.cat),
       }}
     >
       {/* PROPERTY FLAG ICON */}
@@ -81,37 +79,14 @@ export default function Tile({ tile, data }: Props) {
         <img
           src={data.icon}
           alt=""
-          style={{
-            position: "absolute",
-            width: 24,
-            height: 24,
-            borderRadius: "50%",
-            objectFit: "cover",
-            border: "1px solid rgba(255, 255, 255, 0.6)",
-            background: "white",
-            zIndex: 5,
-            ...flagPosition[tile.side],
-          }}
+          className={`absolute w-6 h-6 rounded-full object-cover border border-white/60 bg-white z-5 ${flagPositionClass[tile.side]}`}
         />
       )}
 
       {/* PRICE TAG */}
       {isProperty && data.sdgno && (
         <div
-          style={{
-            color: "#00ffaa",
-            position: "absolute",
-            width: 36,
-            textAlign: "center",
-            fontSize: 10,
-            fontFamily: "Nunito",
-            opacity: 0.85,
-            background: "rgba(255,255,255,0.15)",
-            padding: "2px 6px",
-            borderRadius: 6,
-            ...pricePosition[tile.side],
-
-          }}
+          className={`text-black absolute w-9 text-center text-[10px] font-nunito font-bold bg-white/80 border border-black px-1 py-0.5 rounded ${pricePositionClass[tile.side]}`}
         >
           {data.sdgno}
         </div>
@@ -122,11 +97,7 @@ export default function Tile({ tile, data }: Props) {
         <img
           src={data.icon}
           alt=""
-          style={{
-            width: 28,
-            height: 28,
-            objectFit: "contain",
-          }}
+          className="w-7 h-7 object-contain"
         />
       )}
 
@@ -135,33 +106,14 @@ export default function Tile({ tile, data }: Props) {
         <img
           src={data.icon}
           alt=""
-          style={{
-            width: 42,
-            height: 42,
-            objectFit: "contain",
-          }}
+          className="w-[42px] h-[42px] object-contain"
         />
       )}
 
       <div
+        className={`text-center text-xs font-nunito flex flex-col items-center gap-[3px] px-1 break-normal break-words h-full ${rotationClass} ${namePositionClass[tile.side]}`}
         style={{
-          transform: rotation,
-          textAlign: "center",
-          fontSize: 12,
-          fontFamily: "Nunito",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 3,
-          width:
-            tile.side === "left" || tile.side === "right"
-              ? tile.height
-              : "100%",
-          height: "100%",
-          padding: "0 4px",
-          wordBreak: "normal",
-          overflowWrap: "break-word",
-          ...namePosition[tile.side],
+          width: tile.side === "left" || tile.side === "right" ? tile.height : "100%",
         }}
       >
         <div>{data.name}</div>

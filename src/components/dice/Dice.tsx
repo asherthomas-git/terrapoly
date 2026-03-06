@@ -64,11 +64,14 @@ export default function Dice({ onRoll, disabled }: Props) {
     };
 
     return (
-      <div style={{ ...faceStyle, transform }}>
-        <div style={gridStyle}>
+      <div
+        className="absolute w-[60px] h-[60px] bg-[#fdfdfd] rounded-xl shadow-[inset_0_0_0_1px_#ddd,inset_0_0_15px_rgba(0,0,0,0.1)] backface-hidden p-2 box-border"
+        style={{ transform }}
+      >
+        <div className="grid grid-cols-3 grid-rows-3 w-full h-full">
           {[...Array(9)].map((_, i) => (
-            <div key={i} style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-              {dotMap[value].includes(i) && <div style={dotStyle} />}
+            <div key={i} className="flex justify-center items-center">
+              {dotMap[value].includes(i) && <div className="w-2 h-2 bg-[#333] rounded-full shadow-[inset_0_1px_1px_rgba(0,0,0,0.5)]" />}
             </div>
           ))}
         </div>
@@ -77,8 +80,11 @@ export default function Dice({ onRoll, disabled }: Props) {
   };
 
   const Cube = ({ value }: { value: number }) => (
-    <div style={sceneStyle}>
-      <div style={{ ...cubeStyle, transform: getRotation(value) }}>
+    <div className="w-[60px] h-[60px] mx-auto perspective-[600px]">
+      <div
+        className="w-full h-full relative transition-transform duration-150 ease-out transform-style-3d"
+        style={{ transform: getRotation(value) }}
+      >
         <Face value={1} transform="rotateY(0deg) translateZ(30px)" />
         <Face value={6} transform="rotateX(180deg) translateZ(30px)" />
         <Face value={3} transform="rotateY(90deg) translateZ(30px)" />
@@ -90,8 +96,8 @@ export default function Dice({ onRoll, disabled }: Props) {
   );
 
   return (
-    <div style={{ textAlign: "center", padding: "60px 20px" }}>
-      <div style={{ display: "flex", gap: 60, justifyContent: "center" }}>
+    <div className="text-center py-16 px-5">
+      <div className="flex gap-[60px] justify-center">
         <Cube value={dice1} />
         <Cube value={dice2} />
       </div>
@@ -99,89 +105,12 @@ export default function Dice({ onRoll, disabled }: Props) {
       <button
         onClick={rollDice}
         disabled={rolling || disabled} // ✅ UPDATED
-        style={{
-          ...buttonStyle,
-          width: "140px",
-          opacity: rolling || disabled ? 0.6 : 1, // ✅ UPDATED
-          cursor: rolling || disabled ? "not-allowed" : "pointer"
-        }}
+        className={`w-[140px] mt-[30px] py-2 px-6 text-base font-normal text-white rounded transition-all duration-200 bg-[rgba(74,146,240,0.49)] backdrop-blur-md border border-[rgba(35,90,178,0.15)] shadow-[0_4px_20px_rgba(0,0,0,0.4)] font-nunito ${rolling || disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"
+          }`}
       >
-        <i className="fa-solid fa-dice" style={{ color: "white" }} />
+        <i className="fa-solid fa-dice text-white" />
         {rolling ? " Rolling..." : " Roll Dice"}
       </button>
     </div>
   );
 }
-
-// --- Styles ---
-// 1. The Scene (The outermost wrapper)
-const sceneStyle: React.CSSProperties = {
-  width: "60px",
-  height: "60px",
-  perspective: "600px",
-  margin: "0 auto",
-};
-
-// 2. The Cube (The rotating logic holder)
-const cubeStyle: React.CSSProperties = {
-  width: "100%",
-  height: "100%",
-  position: "relative",
-  transformStyle: "preserve-3d",
-  transition: "transform 0.15s ease-out",
-  // REMOVE: overflow: hidden (This causes the glitch)
-  // REMOVE: background, border, or box-shadow here
-};
-
-// 3. The Face (Where all the visuals live)
-const faceStyle: React.CSSProperties = {
-  position: "absolute",
-  width: "60px",
-  height: "60px",
-  background: "#fdfdfd",
-  // Apply the radius ONLY here
-  borderRadius: "12px", 
-  // Use a shadow instead of a border to avoid "aliasing" lines
-  boxShadow: "inset 0 0 0 1px #ddd, inset 0 0 15px rgba(0,0,0,0.1)",
-  backfaceVisibility: "hidden", // Crucial for performance and clean edges
-  padding: "8px",
-  boxSizing: "border-box",
-};
-
-const gridStyle: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "repeat(3, 1fr)",
-  gridTemplateRows: "repeat(3, 1fr)",
-  width: "100%",
-  height: "100%",
-};
-
-const dotStyle: React.CSSProperties = {
-  width: "8px",
-  height: "8px",
-  background: "#333",
-  borderRadius: "50%",
-  boxShadow: "inset 0 1px 1px rgba(0,0,0,0.5)",
-};
-
-const buttonStyle: React.CSSProperties = {
-  width: "120px",
-  marginTop: "30px",
-  padding: "8px 24px",
-  fontSize: "16px",
-  fontWeight: "normal",
-  cursor: "pointer",
-  backgroundColor: "#6b6299",
-  fontFamily: "Nunito",
-
-  color: "white",
-//   border: "none",
-  borderRadius: "4px",
-  transition: "all 0.2s",
-  background: "rgba(74, 146, 240, 0.49)",
-  backdropFilter: "blur(12px)",
-  WebkitBackdropFilter: "blur(12px)",
-
-  border: "1px solid rgba(35, 90, 178, 0.15)",
-  boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
-};

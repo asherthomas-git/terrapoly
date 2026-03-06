@@ -1,4 +1,3 @@
-import { useState } from "react"
 import { generateBoardLayout } from "../../game/board/boardLayout"
 import { BOARD_SIZE } from "../../game/board/constants"
 import { tiles } from "../../game/data/tiles"
@@ -6,157 +5,70 @@ import Tile from "./Tile"
 import Dice from "../dice/Dice"
 import PlayerToken from "../player/PlayerToken"
 import { getDirection } from "../player/getDirection"
-import { initialPlayers } from "../../game/player/players"
+import type { GameState } from "../../hooks/useGameSocket"
+import { Socket } from "socket.io-client"
 
-export default function Board() {
+type BoardProps = {
+  socket: Socket;
+  gameState: GameState;
+}
+
+export default function Board({ socket, gameState }: BoardProps) {
   const layout = generateBoardLayout()
 
-  const [players, setPlayers] = useState(initialPlayers)
-  const [currentTurn, setCurrentTurn] = useState(0)
+  const myPlayerId = localStorage.getItem("terrapoly_id");
+  const currentPlayerInState = gameState.players[gameState.room.currentTurnIdx];
+  const amICurrentPlayer = currentPlayerInState?.id === myPlayerId;
+  const currentTileIndex = currentPlayerInState?.position || 0;
+  const currentTileData = tiles[currentTileIndex];
 
-  // 🟢 Turn phase
-  const [hasRolled, setHasRolled] = useState(false)
-  const [turnActionDone, setTurnActionDone] = useState(false)
+  // We are relying on the backend state to know if we've acted. 
+  // For UI, we might need a local state just to hide actions after you do one, 
+  // or we can determine what buttons show based on the backend state.
+  // Actually, once they Invest, Pay, or Pass, the backend might NOT auto end turn 
+  // (unless it's built that way). 
+  // Let's add local state to manage phase, since the API doesn't expose a "hasRolled" bool directly yet.
 
-  // 💰 Investment Costs
-  const SEED_COST = 100
-  const FULL_COST = 100
-  const FLAGSHIP_COST = 200
+  // Wait, if we use local state for hasRolled, we need to reset it when turn changes.
+  // Since turn changing is driven by currentTurnIdx, we can track that or just simplify.
+  // We'll keep it simple: Show Roll if they haven't rolled. But wait, how do we know they rolled?
+  // Let's just always show End Turn if amICurrentPlayer, and show Roll if they are on a tile they didn't just land on? 
+  // Actually, standard monopoly: you roll, then you act. 
 
-  // 🎲 Dice Roll
-  const handleRoll = (steps: number) => {
-    if (hasRolled) return
-
-    console.log("🎲 rolled:", steps)
-
-    setPlayers(prev =>
-      prev.map((p, i) =>
-        i === currentTurn
-          ? { ...p, position: (p.position + steps) % layout.length }
-          : p
-      )
-    )
-
-    setHasRolled(true)
+  const handleRoll = () => {
+    socket.emit("roll_dice", { roomCode: gameState.room.roomCode, playerId: myPlayerId });
   }
 
-  // 🎯 Current state
-  const currentPlayer = players[currentTurn]
-  const currentTileIndex = currentPlayer.position
-  const currentTileData = tiles[currentTileIndex]
-
-  const ownedEntry = currentPlayer.ownedTiles.find(
-    t => t.tileId === currentTileIndex
-  )
-
-  const isProperty = currentTileData?.type === "property"
-
-  // 🧠 Determine upgrade level & cost
-  let investCost = 0
-  let canInvest = false
-
-  if (!turnActionDone && isProperty) {
-    if (!ownedEntry) {
-      investCost = SEED_COST
-      canInvest = currentPlayer.impactPoints >= investCost
-    } else if (ownedEntry.level === 1) {
-      investCost = FULL_COST
-      canInvest = currentPlayer.impactPoints >= investCost
-    } else if (ownedEntry.level === 2) {
-      investCost = FLAGSHIP_COST
-      canInvest = currentPlayer.impactPoints >= investCost
-    }
-  }
-
-  // 🏗 Invest / Upgrade
   const handleInvest = () => {
-    console.log("🏗 Investing in:", currentTileData.name)
-
-    setPlayers(prev =>
-      prev.map((p, i) => {
-        if (i !== currentTurn) return p
-
-        const owned = p.ownedTiles.find(t => t.tileId === currentTileIndex)
-
-        // 🟢 First time purchase (Seed)
-        if (!owned) {
-          return {
-            ...p,
-            ownedTiles: [
-              ...p.ownedTiles,
-              { tileId: currentTileIndex, level: 1 }
-            ],
-            impactPoints: p.impactPoints - SEED_COST
-          }
-        }
-
-        // ⬆ Upgrade to Full
-        if (owned.level === 1) {
-          return {
-            ...p,
-            ownedTiles: p.ownedTiles.map(t =>
-              t.tileId === currentTileIndex
-                ? { ...t, level: 2 }
-                : t
-            ),
-            impactPoints: p.impactPoints - FULL_COST
-          }
-        }
-
-        // ⭐ Upgrade to Flagship
-        if (owned.level === 2) {
-          return {
-            ...p,
-            ownedTiles: p.ownedTiles.map(t =>
-              t.tileId === currentTileIndex
-                ? { ...t, level: 3 }
-                : t
-            ),
-            impactPoints: p.impactPoints - FLAGSHIP_COST
-          }
-        }
-
-        return p
-      })
-    )
-
-    // 🔒 Lock action for this turn
-    setTurnActionDone(true)
+    socket.emit("invest", { roomCode: gameState.room.roomCode, playerId: myPlayerId, squareIndex: currentTileIndex });
   }
 
-  // ⏭ End Turn
+  const handlePayRent = () => {
+    socket.emit("pay_donation", { roomCode: gameState.room.roomCode, playerId: myPlayerId, squareIndex: currentTileIndex });
+  }
+
+  const handlePass = () => {
+    socket.emit("pass_action", { roomCode: gameState.room.roomCode, playerId: myPlayerId, squareIndex: currentTileIndex });
+  }
+
   const handleEndTurn = () => {
-    console.log("⏭ End Turn")
-
-    setCurrentTurn(prev => (prev + 1) % players.length)
-    setHasRolled(false)
-    setTurnActionDone(false)
+    socket.emit("end_turn", { roomCode: gameState.room.roomCode });
   }
 
-  // 🎨 Same style as Roll button
-  const actionButtonStyle: React.CSSProperties = {
-    width: "auto",
-    padding: "8px 16px",
-    fontSize: "16px",
-    fontFamily: "Nunito",
-    cursor: "pointer",
-    color: "white",
-    borderRadius: "4px",
-    transition: "all 0.2s",
-    background: "rgba(74, 146, 240, 0.49)",
-    backdropFilter: "blur(12px)",
-    WebkitBackdropFilter: "blur(12px)",
-    border: "1px solid rgba(35, 90, 178, 0.15)",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.4)"
-  }
+  // Determine if tile is owned
+  const propertyOwner = gameState.properties.find(p => p.squareIndex === currentTileIndex)?.ownerId;
+  const isOwned = !!propertyOwner;
+  const isOwnedByMe = propertyOwner === myPlayerId;
+  const isProperty = currentTileData?.type === "property";
+
+  const actionButtonBaseClass = "px-4 py-2 text-sm font-bold font-nunito cursor-pointer text-black rounded border-[3px] border-black shadow-[4px_4px_0px_#000] transition-transform duration-100 hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_#000]";
 
   return (
     <div
+      className="relative mx-auto"
       style={{
-        position: "relative",
         width: BOARD_SIZE,
         height: BOARD_SIZE,
-        margin: "40px auto"
       }}
     >
       {/* 🧩 Tiles */}
@@ -169,8 +81,8 @@ export default function Board() {
       ))}
 
       {/* 👥 Players */}
-      {players.map((player, i) => {
-        const tile = layout[player.position]
+      {gameState.players.map((player, i) => {
+        const tile = layout[player.position] || layout[0]
         const direction = getDirection(tile)
 
         return (
@@ -183,56 +95,33 @@ export default function Board() {
         )
       })}
 
-      {/* 🎲 Dice */}
-      <div
-        style={{
-          position: "absolute",
-          left: "50%",
-          top: "40%",
-          transform: "translate(-50%, -50%)",
-          zIndex: 100
-        }}
-      >
-        <Dice onRoll={handleRoll} disabled={hasRolled} />
+      {/* 🎲 Dice inside center board */}
+      <div className="absolute left-1/2 top-[40%] -translate-x-1/2 -translate-y-1/2 z-[100]">
+        <Dice onRoll={handleRoll} disabled={!amICurrentPlayer} />
       </div>
 
       {/* 🎮 Action Buttons */}
-      {hasRolled && (
-        <div
-          style={{
-            position: "absolute",
-            left: "50%",
-            top: "55%",
-            transform: "translateX(-50%)",
-            display: "flex",
-            gap: "16px",
-            zIndex: 120
-          }}
-        >
-          {/* 🌍 Invest / Upgrade */}
-          <button
-            onClick={handleInvest}
-            disabled={!canInvest}
-            style={{
-              ...actionButtonStyle,
-              opacity: canInvest ? 1 : 0.5,
-              cursor: canInvest ? "pointer" : "not-allowed",
-              fontSize: 12
-            }}
-          >
-            🌍 Invest {investCost}
-          </button>
+      {amICurrentPlayer && (
+        <div className="absolute left-1/2 top-[55%] -translate-x-1/2 flex gap-4 z-[120] bg-white p-4 border-4 border-black shadow-[8px_8px_0px_#000] rounded-lg">
+          {isProperty && !isOwned && (
+            <>
+              <button className={`${actionButtonBaseClass} bg-[#4ade80]`} onClick={handleInvest}>
+                Invest (50 pts)
+              </button>
+              <button className={`${actionButtonBaseClass} bg-[#ff90e8]`} onClick={handlePass}>
+                Pass Target
+              </button>
+            </>
+          )}
 
-          {/* ⏭ End Turn */}
-          <button
-            onClick={handleEndTurn}
-            style={{
-              ...actionButtonStyle,
-              fontSize: 12,
-              width: 120
-            }}
-          >
-            ⏭ End Turn
+          {isProperty && isOwned && !isOwnedByMe && (
+            <button className={`${actionButtonBaseClass} bg-[#fb923c]`} onClick={handlePayRent}>
+              Pay Donation (15 pts)
+            </button>
+          )}
+
+          <button className={`${actionButtonBaseClass} bg-[#93c5fd]`} onClick={handleEndTurn}>
+            End Turn
           </button>
         </div>
       )}

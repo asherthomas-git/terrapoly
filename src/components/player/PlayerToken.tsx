@@ -37,53 +37,26 @@ export default function PlayerToken({
 
   return (
     <div
+      className="absolute rounded-full flex items-center justify-center z-[200]"
       style={{
-        position: "absolute",
         left: centerX,
         top: centerY,
         transform: `translate(-50%, -50%) rotate(${angleMap[direction]}deg)`,
         width: size,
         height: size,
-        borderRadius: "50%",
         background: tokenColor,
         boxShadow: "0 6px 12px rgba(0,0,0,0.35), inset -2px -4px 8px rgba(0,0,0,0.2)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 200,
         transition: "all 0.3s cubic-bezier(0.25, 1, 0.5, 1)"
       }}
     >
       {/* Left Eye */}
-      <div style={{
-        position: "absolute",
-        top: "18%",
-        left: "20%",
-        width: "28%",
-        height: "28%",
-        background: "white",
-        borderRadius: "50%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center"
-      }}>
-        <div style={{ width: "50%", height: "50%", background: "#000", borderRadius: "50%" }} />
+      <div className="absolute top-[18%] left-[20%] w-[28%] h-[28%] bg-white rounded-full flex items-center justify-center">
+        <div className="w-1/2 h-1/2 bg-black rounded-full" />
       </div>
 
       {/* Right Eye */}
-      <div style={{
-        position: "absolute",
-        top: "18%",
-        right: "20%",
-        width: "28%",
-        height: "28%",
-        background: "white",
-        borderRadius: "50%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center"
-      }}>
-        <div style={{ width: "50%", height: "50%", background: "#000", borderRadius: "50%" }} />
+      <div className="absolute top-[18%] right-[20%] w-[28%] h-[28%] bg-white rounded-full flex items-center justify-center">
+        <div className="w-1/2 h-1/2 bg-black rounded-full" />
       </div>
     </div>
   )

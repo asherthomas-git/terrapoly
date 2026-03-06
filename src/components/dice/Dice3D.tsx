@@ -5,7 +5,7 @@ import DiceCube from "./DiceCube"
 export default function Dice3D() {
 
   return (
-    <div style={{ width: 220, height: 150 }}>
+    <div className="w-[220px] h-[150px]">
 
       <Canvas camera={{ position: [0, 3, 5], fov: 50 }}>
 
