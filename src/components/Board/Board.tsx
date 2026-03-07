@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react"
 import { generateBoardLayout } from "../../game/board/boardLayout"
 import { BOARD_SIZE } from "../../game/board/constants"
 import { tiles } from "../../game/data/tiles"
@@ -5,43 +6,34 @@ import Tile from "./Tile"
 import Dice from "../dice/Dice"
 import PlayerToken from "../player/PlayerToken"
 import { getDirection } from "../player/getDirection"
-import { useState } from "react"
 
 type Props = {
   players: any[]
   setPlayers: React.Dispatch<React.SetStateAction<any[]>>
   currentTurn: number
   setCurrentTurn: React.Dispatch<React.SetStateAction<number>>
+  onInvestReady: (fn: () => void, allowed: boolean) => void
+  onEndTurnReady: (fn: () => void) => void
 }
 
 export default function Board({
   players,
   setPlayers,
   currentTurn,
-  setCurrentTurn
+  setCurrentTurn,
+  onInvestReady,
+  onEndTurnReady
 }: Props) {
   const layout = generateBoardLayout()
 
   const [hasRolled, setHasRolled] = useState(false)
   const [turnActionDone, setTurnActionDone] = useState(false)
+  const [movedThisTurn, setMovedThisTurn] = useState(false)
 
   const SEED_COST = 100
   const FULL_COST = 100
   const FLAGSHIP_COST = 200
-
-  const handleRoll = (steps: number) => {
-    if (hasRolled) return
-
-    setPlayers(prev =>
-      prev.map((p, i) =>
-        i === currentTurn
-          ? { ...p, position: (p.position + steps) % layout.length }
-          : p
-      )
-    )
-
-    setHasRolled(true)
-  }
+  const DONATION = 5
 
   const currentPlayer = players[currentTurn]
   const currentTileIndex = currentPlayer.position
@@ -53,23 +45,113 @@ export default function Board({
 
   const isProperty = currentTileData?.type === "property"
 
+  // =========================
+  // 💰 Return rate helpers
+  // =========================
+  const getBaseEarning = (level: number) => {
+    if (level === 1) return 10
+    if (level === 2) return 25
+    if (level === 3) return 60
+    return 0
+  }
+
+  const getPlayerReturnRate = (player: any) => {
+    return player.ownedTiles.reduce((sum: number, t: any) => {
+      return sum + getBaseEarning(t.level) + (t.bonusReturn ?? 0)
+    }, 0)
+  }
+
+  // =========================
+  // 🎲 Dice Roll
+  // =========================
+  const handleRoll = (steps: number) => {
+    if (hasRolled) return
+
+    setPlayers(prev =>
+      prev.map((p, i) => {
+        if (i !== currentTurn) return p
+
+        const oldPos = p.position
+        const newPos = (p.position + steps) % layout.length
+
+        // ✅ START PASS: returns only
+        const passedStart = newPos < oldPos
+        const lapBonus = passedStart ? getPlayerReturnRate(p) : 0
+
+        return {
+          ...p,
+          position: newPos,
+          impactPoints: p.impactPoints + lapBonus
+        }
+      })
+    )
+
+    setHasRolled(true)
+    setMovedThisTurn(true)
+  }
+
+  // =========================
+  // 🤝 Donation System
+  // =========================
+  useEffect(() => {
+    if (!movedThisTurn) return
+    if (!isProperty) return
+
+    const ownerIndex = players.findIndex(p =>
+      p.ownedTiles.some((t: any) => t.tileId === currentTileIndex)
+    )
+
+    if (ownerIndex === -1) return
+    if (ownerIndex === currentTurn) return
+
+    setPlayers(prev =>
+      prev.map((p, i) => {
+        if (i === currentTurn) {
+          return { ...p, impactPoints: p.impactPoints - DONATION }
+        }
+
+        if (i === ownerIndex) {
+          return {
+            ...p,
+            ownedTiles: p.ownedTiles.map((t: any) =>
+              t.tileId === currentTileIndex
+                ? { ...t, bonusReturn: (t.bonusReturn ?? 0) + DONATION }
+                : t
+            )
+          }
+        }
+
+        return p
+      })
+    )
+  }, [movedThisTurn, currentTileIndex])
+
+  // =========================
+  // 🧠 Invest Logic
+  // =========================
   let investCost = 0
   let canInvest = false
 
-  if (!turnActionDone && isProperty) {
-    if (!ownedEntry) {
+  const someoneOwnsTile = players.some(p =>
+    p.ownedTiles.some((t: any) => t.tileId === currentTileIndex)
+  )
+
+  if (!turnActionDone && isProperty && movedThisTurn) {
+    if (!ownedEntry && !someoneOwnsTile) {
       investCost = SEED_COST
       canInvest = currentPlayer.impactPoints >= investCost
-    } else if (ownedEntry.level === 1) {
+    } else if (ownedEntry?.level === 1) {
       investCost = FULL_COST
       canInvest = currentPlayer.impactPoints >= investCost
-    } else if (ownedEntry.level === 2) {
+    } else if (ownedEntry?.level === 2) {
       investCost = FLAGSHIP_COST
       canInvest = currentPlayer.impactPoints >= investCost
     }
   }
 
   const handleInvest = () => {
+    if (!canInvest) return
+
     setPlayers(prev =>
       prev.map((p, i) => {
         if (i !== currentTurn) return p
@@ -79,7 +161,10 @@ export default function Board({
         if (!owned) {
           return {
             ...p,
-            ownedTiles: [...p.ownedTiles, { tileId: currentTileIndex, level: 1 }],
+            ownedTiles: [
+              ...p.ownedTiles,
+              { tileId: currentTileIndex, level: 1, bonusReturn: 0 }
+            ],
             impactPoints: p.impactPoints - SEED_COST
           }
         }
@@ -111,29 +196,26 @@ export default function Board({
     setTurnActionDone(true)
   }
 
+  // =========================
+  // ⏭ End Turn
+  // =========================
   const handleEndTurn = () => {
     setCurrentTurn(prev => (prev + 1) % players.length)
     setHasRolled(false)
     setTurnActionDone(false)
+    setMovedThisTurn(false)
   }
 
-  // 🎨 Same style as Roll Dice button
-  const rollButtonStyle: React.CSSProperties = {
-    width: "120px",
-    padding: "8px 16px",
-    fontSize: "16px",
-    fontWeight: "normal",
-    cursor: "pointer",
-    fontFamily: "Nunito",
-    color: "white",
-    borderRadius: "4px",
-    transition: "all 0.2s",
-    background: "rgb(124, 58, 218)",
-    // backdropFilter: "blur(12px)",
-    // WebkitBackdropFilter: "blur(12px)",
-    border: "1px solid rgba(35, 90, 178, 0.15)",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.4)"
-  }
+  // =========================
+  // 🔌 Expose actions
+  // =========================
+  useEffect(() => {
+    onInvestReady(handleInvest, canInvest)
+  }, [canInvest, currentTurn, movedThisTurn])
+
+  useEffect(() => {
+    onEndTurnReady(handleEndTurn)
+  }, [currentTurn])
 
   return (
     <div style={{ position: "relative", width: BOARD_SIZE, height: BOARD_SIZE }}>
@@ -171,47 +253,16 @@ export default function Board({
         )
       })}
 
-      <div style={{
-        position: "absolute",
-        left: "50%",
-        top: "40%",
-        transform: "translate(-50%, -50%)"
-      }}>
-        <Dice onRoll={handleRoll} disabled={hasRolled} />
-      </div>
-
-      {hasRolled && (
-        <div style={{
+      <div
+        style={{
           position: "absolute",
           left: "50%",
-          top: "55%",
-          transform: "translateX(-50%)",
-          display: "flex",
-          gap: "16px"
-        }}>
-          <button
-            onClick={handleInvest}
-            disabled={!canInvest}
-            style={{
-              ...rollButtonStyle,
-              opacity: canInvest ? 1 : 0.5,
-              cursor: canInvest ? "pointer" : "not-allowed"
-            }}
-          >
-            <i
-              className="fa-solid fa-hand-holding-dollar"
-              style={{ color: "rgb(255, 255, 255)", marginRight: "4px" }}
-            /> Invest 
-          </button>
-
-          <button
-            onClick={handleEndTurn}
-            style={rollButtonStyle}
-          >
-            ⏭ End Turn
-          </button>
-        </div>
-      )}
+          top: "40%",
+          transform: "translate(-50%, -50%)"
+        }}
+      >
+        <Dice onRoll={handleRoll} disabled={hasRolled} />
+      </div>
     </div>
   )
 }

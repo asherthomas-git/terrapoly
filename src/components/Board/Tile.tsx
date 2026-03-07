@@ -23,13 +23,13 @@ export default function Tile({ tile, data, ownerId }: Props) {
   const bodyOrder = stripOrder === 0 ? 1 : 0;
   const stripSize = 28;
 
-  const playerColors = ["#ffffff", "#C6D63A", "#D96AA6", "#E71C1C"];
+  const playerColors = ["#0d8b4ce0", "#C6D63A", "#D96AA6", "#E71C1C"];
   const borderColor = "#0e1621"; // Define your border color here
 
   const stripColor =
     ownerId !== undefined
       ? playerColors[ownerId % playerColors.length]
-      : (data.cat || "#0f2f1f");
+      : ("#fff");
 
   const getAlignment = () => {
     if (tile.side === "bottom") return { justifyContent: "flex-start" };

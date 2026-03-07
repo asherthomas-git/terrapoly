@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import Board from "./components/Board/Board"
 import { BOARD_SIZE } from "./game/board/constants"
 import { tiles } from "./game/data/tiles"
@@ -10,38 +10,64 @@ import GlobalScorePanel from "./components/panels/GlobalScorePanel"
 import CurrentScorePanel from "./components/panels/CurrentScorePanel"
 
 export default function App() {
-  // 🧠 GAME STATE LIFTED HERE
   const [players, setPlayers] = useState(initialPlayers)
   const [currentTurn, setCurrentTurn] = useState(0)
 
-  const currentPlayer = players[currentTurn]
+  // 🔌 actions from Board
+  const [investAction, setInvestAction] = useState<() => void>(() => {})
+  const [canInvest, setCanInvest] = useState(false)
+  const [endTurnAction, setEndTurnAction] = useState<() => void>(() => {})
 
-  // 🎯 Tile player is currently on
+  const currentPlayer = players[currentTurn]
   const currentTile = tiles[currentPlayer.position]
 
-  // 💰 Earnings per level
-  const getEarning = (level: number) => {
+  // 🧠 Ownership lookup
+  const ownedEntry = currentPlayer.ownedTiles.find(
+    t => t.tileId === currentPlayer.position
+  )
+
+  // 💰 Earnings per level (BASE ONLY — donation bonus handled in Board)
+  const getBaseEarning = (level: number) => {
     if (level === 1) return 10
     if (level === 2) return 25
     if (level === 3) return 60
     return 0
   }
 
-  // 💵 Property base cost (seed funding)
   const getCost = () => 100
 
-  // 🏗 Owned properties detailed view
+  // 🏗 Owned properties detailed view (includes donation bonus)
   const ownedTilesDetailed = currentPlayer.ownedTiles.map(t => {
     const tileInfo = tiles[t.tileId]
     return {
       name: tileInfo.name,
       level: t.level,
-      earn: getEarning(t.level)
+      earn: getBaseEarning(t.level) + (t.bonusReturn ?? 0)
     }
   })
 
   // 📈 Total return rate
   const returnRate = ownedTilesDetailed.reduce((sum, t) => sum + t.earn, 0)
+
+  const isProperty = currentTile.type === "property"
+
+  // 🌍 GLOBAL CATEGORY DONATION TOTALS
+  const categoryScores = useMemo(() => {
+    const map: Record<string, number> = {}
+
+    players.forEach(p => {
+      p.ownedTiles.forEach(t => {
+        const tile = tiles[t.tileId]
+        const cat = tile.category ?? "other"
+        map[cat] = (map[cat] ?? 0) + (t.bonusReturn ?? 0)
+      })
+    })
+
+    return Object.entries(map).map(([category, totalDonations]) => ({
+      category,
+      totalDonations
+    }))
+  }, [players])
 
   return (
     <div style={pageLayout}>
@@ -50,11 +76,11 @@ export default function App() {
         <PropertyPanel
           name={currentTile.name}
           desc={currentTile.desc}
-          cost={getCost()}
-          earn={getEarning(1)}
+          cost={isProperty ? getCost() : undefined}
+          earn={isProperty ? getBaseEarning(ownedEntry?.level ?? 1) : undefined}
           sdg={currentTile.sdgno}
           region={currentTile.region}
-          category={currentTile.prop}
+          category={currentTile.category}
           categoryColor={currentTile.catsec}
           icon={
             currentTile.icon && (
@@ -65,7 +91,12 @@ export default function App() {
               />
             )
           }
+          level={ownedEntry?.level}
+          onBuy={investAction}
+          onSkip={endTurnAction}
+          buyDisabled={!canInvest}
         />
+
         <LogPanel />
       </div>
 
@@ -75,11 +106,16 @@ export default function App() {
         setPlayers={setPlayers}
         currentTurn={currentTurn}
         setCurrentTurn={setCurrentTurn}
+        onInvestReady={(fn, allowed) => {
+          setInvestAction(() => fn)
+          setCanInvest(allowed)
+        }}
+        onEndTurnReady={(fn) => setEndTurnAction(() => fn)}
       />
 
       {/* RIGHT PANEL */}
       <div style={sidePanelStyle}>
-        <GlobalScorePanel />
+        <GlobalScorePanel categoryScores={categoryScores} />
 
         <CurrentScorePanel
           impactPoints={currentPlayer.impactPoints}
@@ -90,6 +126,8 @@ export default function App() {
     </div>
   )
 }
+
+/* ================= LAYOUT ================= */
 
 const pageLayout: React.CSSProperties = {
   display: "flex",
@@ -110,7 +148,6 @@ const sidePanelStyle: React.CSSProperties = {
   alignItems: "center",
   background: "rgba(29, 50, 80, 0.8)",
   backdropFilter: "blur(24px)",
-  WebkitBackdropFilter: "blur(12px)",
   border: "1px solid rgba(35,90,178,0.15)",
   borderRadius: "12px",
   boxShadow: "0 8px 32px rgba(0,0,0,0.35)"

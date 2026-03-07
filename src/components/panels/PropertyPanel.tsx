@@ -8,6 +8,12 @@ type Props = {
   category?: string
   categoryColor?: string
   icon?: React.ReactNode
+
+  level?: number          // ⭐ ownership level
+  buyDisabled?: boolean   // ⭐ turn lock / insufficient points
+
+  onBuy?: () => void
+  onSkip?: () => void
 }
 
 export default function PropertyPanel({
@@ -19,10 +25,30 @@ export default function PropertyPanel({
   region,
   category,
   categoryColor,
-  icon
+  icon,
+  level,
+  buyDisabled,
+  onBuy,
+  onSkip
 }: Props) {
-  const isProperty = !!cost
+  const isProperty = !!sdg
 
+  // 🧠 BUTTON LOGIC
+  const notOwned = isProperty && !level
+  const canUpgrade = isProperty && level && level < 3
+  const maxLevel = isProperty && level === 3
+
+  const showLeftButton =
+    (notOwned || canUpgrade) && !buyDisabled
+
+  const leftText =
+    notOwned ? "BUY" :
+    canUpgrade ? "UPGRADE" :
+    ""
+
+  const rightText = showLeftButton ? "SKIP" : "NEXT"
+
+  // 🧱 Empty State
   if (!name) {
     return (
       <div style={{ ...panel, width: "80%" }}>
@@ -32,44 +58,70 @@ export default function PropertyPanel({
   }
 
   return (
-    <div style={{ ...panel, background: categoryColor, border: "1px solid black", width: "80%",display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-      <div style={{display: "flex", flexDirection: "column",height: "80%", justifyContent: "space-around", alignItems: "center"}}>
-      {/* CATEGORY */}
-      {category && <div style={categoryPill}>{category}</div>}
+    <div
+      style={{
+        ...panel,
+        background: categoryColor,
+        border: "1px solid black",
+        width: "80%",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between"
+      }}
+    >
+      {/* TOP CONTENT */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          height: "80%",
+          justifyContent: "space-around",
+          alignItems: "center"
+        }}
+      >
+        {category && <div style={categoryPill}>{category}</div>}
+        {icon && <div style={iconBox}>{icon}</div>}
+        <div style={title}>{name}</div>
+        {desc && <div style={descStyle}>{desc}</div>}
 
-      {/* ICON SLOT */}
-      {icon && <div style={iconBox}>{icon}</div>}
+        <div style={tagRow}>
+          {sdg && <div style={tag}>{sdg}</div>}
+          {region && <div style={tag}>{region}</div>}
+        </div>
 
-      {/* TITLE */}
-      <div style={title}>{name}</div>
-
-      {/* DESCRIPTION */}
-      {desc && <div style={descStyle}>{desc}</div>}
-
-      {/* TAGS */}
-      <div style={tagRow}>
-        {sdg && <div style={tag}>{sdg}</div>}
-        {region && <div style={tag}>{region}</div>}
+        {isProperty && (
+          <>
+            <div style={costStyle}>COST: {cost} pts</div>
+            <div style={earnStyle}>EARN: {earn} pts / round</div>
+          </>
+        )}
       </div>
 
-      {/* COST */}
-      {isProperty && (
-        <>
-          <div style={costStyle}>COST: {cost} pts</div>
-          <div style={earnStyle}>EARN: {earn} pts / round</div>
-        </>
-      )}
-        </div>
-      {/* ACTIONS */}
-      {isProperty && (
-        <div style={actions}>
-          <button style={buyBtn}>BUY</button>
-          <button style={skipBtn}>SKIP</button>
-        </div>
-      )}
+      {/* ACTION BUTTONS */}
+      <div style={actions}>
+        {showLeftButton && (
+          <button
+            style={{
+              ...buyBtn,
+              opacity: buyDisabled ? 0.5 : 1,
+              cursor: buyDisabled ? "not-allowed" : "pointer"
+            }}
+            onClick={onBuy}
+            disabled={buyDisabled}
+          >
+            {leftText}
+          </button>
+        )}
+
+        <button style={skipBtn} onClick={onSkip}>
+          {rightText}
+        </button>
+      </div>
     </div>
   )
 }
+
+/* ================= STYLES ================= */
 
 const panel: React.CSSProperties = {
   height: "70%",
@@ -80,7 +132,7 @@ const panel: React.CSSProperties = {
   alignItems: "center",
   textAlign: "center",
   gap: "14px",
-  fontFamily: "ITCKabel",
+  fontFamily: "ITCKabel"
 }
 
 const categoryPill: React.CSSProperties = {
@@ -145,14 +197,14 @@ const actions: React.CSSProperties = {
 }
 
 const buyBtn: React.CSSProperties = {
-  width: "35%",
+  minWidth: "35%",
+  width: "auto",
   background: "#ef4444",
   color: "white",
   border: "none",
-  padding: "8px 0",
+  padding: "8px 8px",
   fontSize: 22,
-  fontWeight: 800,
-  cursor: "pointer"
+  fontWeight: 800
 }
 
 const skipBtn: React.CSSProperties = {
@@ -162,6 +214,5 @@ const skipBtn: React.CSSProperties = {
   border: "none",
   padding: "8px 0",
   fontSize: 22,
-  fontWeight: 800,
-  cursor: "pointer",
+  fontWeight: 800
 }

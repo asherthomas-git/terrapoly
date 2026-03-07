@@ -27,20 +27,33 @@ export default function PlayerToken({
 
   // 🎨 Different colors per player
   const playerColors = [
-    "radial-gradient(circle at 35% 35%, #ffffff 0%, #ababab 100%)", // Player 1 — Red
-    "radial-gradient(circle at 35% 35%, #C6D63A 0%, #c1cd54 100%)", // Player 2 — Blue
-    "radial-gradient(circle at 35% 35%, #D96AA6 0%, #d1639e 100%)", // Player 3 — Green
-    "radial-gradient(circle at 35% 35%, #E71C1C 0%, #b33434 100%)", // Player 4 — Yellow
+    "radial-gradient(circle at 35% 35%, #0d8b4ce0 0%, #148f49 100%)",
+    "radial-gradient(circle at 35% 35%, #C6D63A 0%, #c1cd54 100%)",
+    "radial-gradient(circle at 35% 35%, #D96AA6 0%, #d1639e 100%)",
+    "radial-gradient(circle at 35% 35%, #E71C1C 0%, #b33434 100%)",
   ]
 
   const tokenColor = playerColors[playerIndex % playerColors.length]
+
+  // 🧩 STACKING OFFSET (prevents overlap)
+  const STACK_OFFSET = 10
+
+  const offsetX =
+    direction === "up" || direction === "down"
+      ? (playerIndex - 1.5) * STACK_OFFSET
+      : 0
+
+  const offsetY =
+    direction === "left" || direction === "right"
+      ? (playerIndex - 1.5) * STACK_OFFSET
+      : 0
 
   return (
     <div
       style={{
         position: "absolute",
-        left: centerX,
-        top: centerY,
+        left: centerX + offsetX,
+        top: centerY + offsetY,
         transform: `translate(-50%, -50%) rotate(${angleMap[direction]}deg)`,
         width: size,
         height: size,
