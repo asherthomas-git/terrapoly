@@ -19,25 +19,32 @@ export default function PeoplesVoiceOverlay({ socket, gameState, myPlayerId, onC
     const [result, setResult] = useState<'praise' | 'demand' | 'skipped_demand' | 'demand_resolved' | null>(null);
     const [resolvedData, setResolvedData] = useState<any>(null);
     const [hasVoted, setHasVoted] = useState(false);
+    const [closeTimer, setCloseTimer] = useState<number | null>(null);
 
     useEffect(() => {
         const handleResolved = (data: any) => {
             setResult(data.result);
             setResolvedData(data);
             setIsFlipped(true);
-
-            // Auto-close after showing result
-            setTimeout(() => {
-                onClose();
-            }, 6000);
+            setCloseTimer(6);
         };
 
         socket.on('peoples_voice_resolved', handleResolved);
 
+        let timerId: ReturnType<typeof setInterval>;
+        if (closeTimer !== null && closeTimer > 0) {
+            timerId = setInterval(() => {
+                setCloseTimer((prev) => prev !== null ? prev - 1 : null);
+            }, 1000);
+        } else if (closeTimer === 0) {
+            onClose();
+        }
+
         return () => {
             socket.off('peoples_voice_resolved', handleResolved);
+            if (timerId) clearInterval(timerId);
         };
-    }, [socket, onClose]);
+    }, [socket, onClose, closeTimer]);
 
     const handleCardClick = (index: number) => {
         if (!amICurrentPlayer) return;
@@ -220,6 +227,20 @@ export default function PeoplesVoiceOverlay({ socket, gameState, myPlayerId, onC
                                 </p>
                             </>
                         )}
+
+                        <div className="mt-8 flex flex-col items-center gap-2">
+                            <button
+                                onClick={onClose}
+                                className="px-6 py-2 bg-amber-900 text-white font-bold rounded-lg uppercase tracking-wide shadow-[4px_4px_0_rgba(69,26,3,1)] hover:-translate-y-1 hover:shadow-[4px_6px_0_rgba(69,26,3,1)] active:translate-y-1 active:shadow-none transition-all"
+                            >
+                                Close
+                            </button>
+                            {closeTimer !== null && (
+                                <p className="text-sm font-bold text-amber-800">
+                                    Closing in {closeTimer}s...
+                                </p>
+                            )}
+                        </div>
                     </div>
                 )}
             </div>

@@ -6,9 +6,10 @@ type Props = {
   data: TileData;
   ownerColor?: string;
   level?: number;
+  onClick?: () => void;
 };
 
-export default function Tile({ tile, data, ownerColor }: Props) {
+export default function Tile({ tile, data, ownerColor, onClick }: Props) {
   const isProperty = data.type === "property";
   const isCorner = ["start", "jail", "goToJail", "parking"].includes(data.type || "");
   const isEdgeTile = !isCorner;
@@ -57,6 +58,8 @@ export default function Tile({ tile, data, ownerColor }: Props) {
   if (isCorner) {
     return (
       <div
+        className={onClick ? "cursor-pointer transition-all duration-200 hover:brightness-110 hover:scale-[1.02] relative hover:z-20 hover:shadow-xl" : ""}
+        onClick={onClick}
         style={{
           gridColumn: tile.gridColumn,
           gridRow: tile.gridRow,
@@ -74,6 +77,8 @@ export default function Tile({ tile, data, ownerColor }: Props) {
 
   return (
     <div
+      className={onClick ? "cursor-pointer transition-all duration-200 hover:brightness-110 hover:scale-[1.02] relative hover:z-20 hover:shadow-xl" : ""}
+      onClick={onClick}
       style={{
         gridColumn: tile.gridColumn,
         gridRow: tile.gridRow,

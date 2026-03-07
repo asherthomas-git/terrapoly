@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+
 export type HeadlineModalProps = {
     headline: {
         title: string;
@@ -10,6 +12,23 @@ export type HeadlineModalProps = {
 };
 
 export default function HeadlineModal({ headline, onClose }: HeadlineModalProps) {
+    const [closeTimer, setCloseTimer] = useState<number>(6);
+
+    useEffect(() => {
+        let timerId: ReturnType<typeof setInterval>;
+        if (closeTimer > 0) {
+            timerId = setInterval(() => {
+                setCloseTimer((prev) => prev - 1);
+            }, 1000);
+        } else if (closeTimer === 0) {
+            onClose();
+        }
+
+        return () => {
+            if (timerId) clearInterval(timerId);
+        };
+    }, [closeTimer, onClose]);
+
     const isPositive = headline.type === 'positive';
     const bgColor = isPositive ? '#4ade80' : '#ef4444'; // Green or Red
     const textColor = isPositive ? 'text-green-900' : 'text-red-900';
@@ -62,12 +81,19 @@ export default function HeadlineModal({ headline, onClose }: HeadlineModalProps)
                     </div>
 
                     {/* Action */}
-                    <button
-                        onClick={onClose}
-                        className="w-full bg-white text-black font-black text-xl py-3 rounded-xl border-4 border-black active:translate-y-1 active:shadow-none transition-all shadow-[0_4px_0_#000]"
-                    >
-                        CONTINUE
-                    </button>
+                    <div className="flex flex-col items-center gap-2">
+                        <button
+                            onClick={onClose}
+                            className="w-full bg-white text-black font-black text-xl py-3 rounded-xl border-4 border-black active:translate-y-1 active:shadow-none transition-all shadow-[0_4px_0_#000]"
+                        >
+                            CONTINUE
+                        </button>
+                        {closeTimer > 0 && (
+                            <p className={`text-sm font-bold ${isPositive ? 'text-green-900' : 'text-red-900'} opacity-80 mt-1`}>
+                                Auto-closing in {closeTimer}s...
+                            </p>
+                        )}
+                    </div>
                 </div>
             </div>
 

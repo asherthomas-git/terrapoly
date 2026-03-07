@@ -3,9 +3,11 @@ import { tiles } from "../../game/data/tiles"
 import Tile from "./Tile"
 import Dice from "../dice/Dice"
 import PlayerToken from "../player/PlayerToken"
-import { getDirection } from "../player/getDirection"
 import type { GameState } from "../../hooks/useGameSocket"
 import { Socket } from "socket.io-client"
+import { useState } from "react"
+import TileInfoModal from "../HUD/TileInfoModal"
+import type { TileData } from "../../game/data/tiles"
 
 type BoardProps = {
   socket: Socket;
@@ -14,6 +16,7 @@ type BoardProps = {
 
 export default function Board({ socket, gameState }: BoardProps) {
   const layout = generateBoardLayout()
+  const [selectedInfoTile, setSelectedInfoTile] = useState<TileData | null>(null);
 
   const myPlayerId = localStorage.getItem("terrapoly_id");
   const currentPlayerInState = gameState.players[gameState.room.currentTurnIdx];
@@ -59,24 +62,20 @@ export default function Board({ socket, gameState }: BoardProps) {
               tile={tileLayout}
               data={data}
               ownerColor={ownerColor}
+              onClick={() => setSelectedInfoTile(data)}
             />
           )
         })}
 
         {/* 👥 Players */}
-        {gameState.players.map((player, i) => {
-          const tile = layout[player.position] || layout[0]
-          const direction = getDirection(tile)
-
-          return (
-            <PlayerToken
-              key={player.id}
-              tile={tile}
-              direction={direction}
-              playerIndex={i}
-            />
-          )
-        })}
+        {gameState.players.map((player, i) => (
+          <PlayerToken
+            key={player.id}
+            targetPosition={player.position}
+            layout={layout}
+            playerIndex={i}
+          />
+        ))}
 
         {/* Center Area background (to cover holes in the grid) */}
         <div
@@ -105,6 +104,13 @@ export default function Board({ socket, gameState }: BoardProps) {
           )}
         </div>
       </div>
+
+      {selectedInfoTile && (
+        <TileInfoModal
+          tileData={selectedInfoTile}
+          onClose={() => setSelectedInfoTile(null)}
+        />
+      )}
     </div>
   )
 }

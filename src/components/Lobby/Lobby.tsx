@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { Globe, Sparkles, Rocket, X } from "lucide-react";
+import { Sparkles, Rocket, X, ArrowLeft, LogOut } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 import type { GameState } from "../../hooks/useGameSocket";
 import { Socket } from "socket.io-client";
+import LandingHero from "../LandingHero";
 
 type LobbyProps = {
     socket: Socket;
@@ -14,6 +15,8 @@ export default function Lobby({ socket, gameState }: LobbyProps) {
     const [playerName, setPlayerName] = useState("");
     const [botPersonality, setBotPersonality] = useState<"Greedy" | "Eco-Warrior" | "Balanced">("Balanced");
     const [maxRounds, setMaxRounds] = useState(15);
+    const [startingImpact, setStartingImpact] = useState(200);
+    const [showForm, setShowForm] = useState(false);
 
     useEffect(() => {
         // Ensure the player has a local ID
@@ -59,7 +62,7 @@ export default function Lobby({ socket, gameState }: LobbyProps) {
             alert("Game cannot start with a single player.");
             return;
         }
-        socket.emit("start_game", { roomCode: gameState.room.roomCode, maxRounds });
+        socket.emit("start_game", { roomCode: gameState.room.roomCode, maxRounds, startingImpact });
     };
 
     const handleKickPlayer = (targetPlayerId: string) => {
@@ -67,13 +70,31 @@ export default function Lobby({ socket, gameState }: LobbyProps) {
         socket.emit("kick_player", { roomCode: gameState.room.roomCode, targetPlayerId });
     };
 
+    const handleLeaveRoom = () => {
+        if (!gameState?.room?.roomCode) return;
+        if (window.confirm("Are you sure you want to leave the room?")) {
+            const playerId = localStorage.getItem("terrapoly_id");
+            socket.emit("leave_room", { roomCode: gameState.room.roomCode, playerId });
+            sessionStorage.removeItem("terrapoly_roomInfo");
+            window.location.reload();
+        }
+    };
+
     const myPlayerId = localStorage.getItem("terrapoly_id");
     const isOwner = gameState?.ownerId === myPlayerId;
     const inRoom = !!gameState?.room?.roomCode;
 
+    if (!inRoom && !showForm) {
+        return <LandingHero onPlay={() => setShowForm(true)} />;
+    }
+
     return (
-        <div className="flex flex-col items-center justify-center h-full font-nunito text-black">
-            <h1 className="text-white text-4xl sm:text-5xl mb-5 mr-3 flex items-center justify-center gap-2 sm:gap-3">Terrapoly<Globe className="w-8 h-8 sm:w-12 sm:h-12" />2030</h1>
+        <div className="flex flex-col items-center justify-center min-h-[100dvh] bg-[#93c5fd] font-nunito text-black py-10">
+            <img
+                src="/logo.png"
+                alt="Terrapoly 2030"
+                className="w-64 sm:w-80 h-auto object-contain mb-8 drop-shadow-[4px_4px_0_rgba(0,0,0,1)]"
+            />
 
             {!inRoom ? (
                 <div className="bg-[#fdfbf7] border-4 border-black shadow-[8px_8px_0px_#000] p-6 sm:p-8 rounded-lg w-11/12 max-w-[400px] flex flex-col gap-4">
@@ -99,7 +120,7 @@ export default function Lobby({ socket, gameState }: LobbyProps) {
                         <div className="flex-grow border-t-2 border-dashed border-gray-400"></div>
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 mb-2">
                         <input
                             className="flex-1 p-3 text-base border-[3px] border-black rounded font-inherit outline-none focus:ring-2 focus:ring-black/20 uppercase"
                             placeholder="ABCD..."
@@ -113,9 +134,23 @@ export default function Lobby({ socket, gameState }: LobbyProps) {
                             Join
                         </button>
                     </div>
+
+                    <button
+                        className="p-3 text-base border-[3px] border-black rounded outline-none bg-white font-bold cursor-pointer shadow-[4px_4px_0px_#000] transition-transform duration-100 hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_#000] flex justify-center items-center gap-2"
+                        onClick={() => setShowForm(false)}
+                    >
+                        <ArrowLeft size={20} /> Back to Home
+                    </button>
                 </div>
             ) : (
-                <div className="bg-[#fdfbf7] border-4 border-black shadow-[8px_8px_0px_#000] p-6 sm:p-8 rounded-lg w-11/12 max-w-[400px] flex flex-col gap-4">
+                <div className="bg-[#fdfbf7] border-4 border-black shadow-[8px_8px_0px_#000] p-6 sm:p-8 rounded-lg w-11/12 max-w-[400px] flex flex-col gap-4 relative">
+                    <button
+                        onClick={handleLeaveRoom}
+                        className="absolute -top-4 -right-4 bg-red-500 text-white w-10 h-10 border-4 border-black rounded-full flex items-center justify-center shadow-[4px_4px_0px_#000] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_#000] transition-all z-10"
+                        title="Leave Room"
+                    >
+                        <LogOut size={16} strokeWidth={3} />
+                    </button>
                     <h2 className="text-2xl font-bold">Room: {gameState?.room.roomCode}</h2>
 
                     <div className="mb-5">
@@ -171,6 +206,17 @@ export default function Lobby({ socket, gameState }: LobbyProps) {
                                     value={maxRounds}
                                     onChange={(e) => setMaxRounds(Math.max(1, parseInt(e.target.value) || 15))}
                                     min="1"
+                                />
+                            </label>
+                            <label className="font-bold flex justify-between items-center text-sm">
+                                Starting Impact:
+                                <input
+                                    type="number"
+                                    className="p-1 w-20 border-2 border-black rounded text-center font-bold outline-none"
+                                    value={startingImpact}
+                                    onChange={(e) => setStartingImpact(Math.max(0, parseInt(e.target.value) || 0))}
+                                    min="0"
+                                    step="50"
                                 />
                             </label>
                             <button

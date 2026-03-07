@@ -15,6 +15,7 @@ type TileActionModalProps = {
     onPass: () => void;
     onUpgrade: () => void;
     investmentLevel: string;
+    synergyCount: number;
 };
 
 export default function TileActionModal({
@@ -31,6 +32,7 @@ export default function TileActionModal({
     onPass,
     onUpgrade,
     investmentLevel,
+    synergyCount,
 }: TileActionModalProps) {
     const getBgColor = () => {
         if (!isProperty) return "#e5e7eb";
@@ -95,16 +97,23 @@ export default function TileActionModal({
                     </p>
 
                     {isProperty && (
-                        <div className="flex justify-center gap-2 mb-2">
+                        <div className="flex flex-col items-center gap-1 mb-2">
+                            <div className="flex justify-center gap-2">
+                                {tileData.sdgno && (
+                                    <span className="bg-white text-black rounded-full px-2 py-1 text-[10px] font-bold border-2 border-black flex items-center shadow-sm">
+                                        {tileData.sdgno}
+                                    </span>
+                                )}
+                                {tileData.region && (
+                                    <span className="bg-white text-black rounded-full px-2 py-1 text-[10px] font-bold border-2 border-black flex items-center shadow-sm">
+                                        {tileData.region}
+                                    </span>
+                                )}
+                            </div>
                             {tileData.sdgno && (
-                                <span className="bg-white text-black rounded-full px-2 py-1 text-[10px] font-bold border-2 border-black flex items-center">
-                                    {tileData.sdgno}
-                                </span>
-                            )}
-                            {tileData.region && (
-                                <span className="bg-white text-black rounded-full px-2 py-1 text-[10px] font-bold border-2 border-black flex items-center">
-                                    {tileData.region}
-                                </span>
+                                <div className="text-[10px] font-black uppercase tracking-widest bg-black text-white px-2 py-0.5 rounded shadow-sm mt-1">
+                                    {synergyCount > 0 ? `Your ${tileData.sdgno} Portfolio: ${synergyCount}` : 'Build an SDG Portfolio!'}
+                                </div>
                             )}
                         </div>
                     )}

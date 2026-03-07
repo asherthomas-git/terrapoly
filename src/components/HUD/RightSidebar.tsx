@@ -6,12 +6,14 @@ import { Bot, Target, BookOpen, LogOut } from "lucide-react";
 import { useState } from "react";
 import SDGListModal from "./SDGListModal";
 import QuickGuideModal from "./QuickGuideModal";
+import { Socket } from "socket.io-client";
 
 type RightSidebarProps = {
     gameState: GameState;
+    socket: Socket;
 };
 
-export default function RightSidebar({ gameState }: RightSidebarProps) {
+export default function RightSidebar({ gameState, socket }: RightSidebarProps) {
     // Base colors matching PlayerToken radial-gradients
     const baseColors = ["#ff5e5e", "#5ea1ff", "#5eff9b", "#ffd45e"];
 
@@ -24,6 +26,7 @@ export default function RightSidebar({ gameState }: RightSidebarProps) {
 
     const handleLeaveGame = () => {
         if (window.confirm("Are you sure you want to leave the game?")) {
+            socket.emit("leave_room", { roomCode: gameState.room.roomCode, playerId: myPlayerId });
             sessionStorage.removeItem("terrapoly_roomInfo");
             window.location.reload(); // Quickest way to dump state and go to Lobby considering App routing checks this
         }
@@ -54,7 +57,7 @@ export default function RightSidebar({ gameState }: RightSidebarProps) {
                                 const t = tiles[p.squareIndex];
                                 const level = p.investmentLevel || 'SEED';
                                 const earn = BASE_INCOME + p.bonusReturns;
-                                return { name: t.name, level, earn };
+                                return { name: t.name, level, earn, sdgno: t.sdgno };
                             });
 
                         const returnRate = playerTiles.reduce((acc, t) => acc + t.earn, 0);
@@ -88,20 +91,40 @@ export default function RightSidebar({ gameState }: RightSidebarProps) {
                                         <span className="text-base font-black text-green-900">+{returnRate} pts / round</span>
                                     </div>
 
-                                    {/* Owned Properties */}
-                                    <div className="mt-2 font-black opacity-80 uppercase tracking-wide text-xs">Owned Projects</div>
+                                    {/* Owned Properties (SDG Portfolios) */}
+                                    <div className="mt-2 font-black opacity-80 uppercase tracking-wide text-xs">SDG Portfolios</div>
                                     <div className="flex flex-col gap-2 max-h-[140px] overflow-y-auto pr-1" style={{ scrollbarWidth: 'thin' }}>
                                         {playerTiles.length === 0 && (
-                                            <div className="opacity-60 italic text-xs py-1">No investments yet</div>
+                                            <div className="opacity-60 italic text-xs py-1">No portfolios yet</div>
                                         )}
-                                        {playerTiles.map((t, i) => (
-                                            <div key={i} className="bg-white/30 px-3 py-2 rounded border-2 border-black/10 flex flex-col">
-                                                <span className="truncate">{t.name}</span>
-                                                <span className="text-[10px] opacity-70 uppercase mt-0.5">
-                                                    {LEVEL_LABELS[t.level] || t.level} • +{t.earn}/round
-                                                </span>
-                                            </div>
-                                        ))}
+                                        {
+                                            // Group by SDG
+                                            Object.entries(
+                                                playerTiles.reduce((acc, t) => {
+                                                    const group = t.sdgno || 'Other Projects';
+                                                    if (!acc[group]) acc[group] = [];
+                                                    acc[group].push(t);
+                                                    return acc;
+                                                }, {} as Record<string, typeof playerTiles>)
+                                            ).map(([sdgGroup, propList]) => (
+                                                <div key={sdgGroup} className="bg-white/30 p-2 rounded border-2 border-black/20 flex flex-col gap-1">
+                                                    <div className="flex items-center justify-between mb-1">
+                                                        <span className="text-[10px] font-black uppercase bg-black text-white px-2 py-0.5 rounded-full">{sdgGroup}</span>
+                                                        {propList.length >= 2 && (
+                                                            <span className="text-[9px] font-black text-white bg-green-600 px-1.5 py-0.5 rounded shadow-[1px_1px_0_#000]">SYNERGY BONUS</span>
+                                                        )}
+                                                    </div>
+                                                    {propList.map((t, i) => (
+                                                        <div key={i} className="flex justify-between items-center bg-white/40 px-2 py-1 rounded border border-black/10 text-xs">
+                                                            <span className="truncate mr-2 font-bold">{t.name}</span>
+                                                            <span className="text-[9px] font-bold uppercase whitespace-nowrap opacity-80">
+                                                                {LEVEL_LABELS[t.level] || t.level} • +{t.earn}/rd
+                                                            </span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ))
+                                        }
                                     </div>
                                 </div>
                             </div>

@@ -149,12 +149,18 @@ export default function GameLayout({ socket, gameState }: GameLayoutProps) {
 
     // player info for mobile HUD
     const baseColors = ["#ff5e5e", "#5ea1ff", "#5eff9b", "#ffd45e"];
+    const baseColorNames = ["Red", "Blue", "Green", "Yellow"];
     const myPlayer = gameState.players.find(p => p.id === myPlayerId);
     const myPlayerIdx = gameState.players.findIndex(p => p.id === myPlayerId);
     const myPlayerColor = baseColors[myPlayerIdx % baseColors.length];
+    const myPlayerColorName = baseColorNames[myPlayerIdx % baseColorNames.length];
 
     const currentPropertyData = gameState.properties.find(p => p.squareIndex === currentTileIndex);
     const currentInvestmentLevel = currentPropertyData?.investmentLevel || 'SEED';
+
+    const synergyCount = currentTileData?.sdgno
+        ? gameState.properties.filter(p => p.ownerId === myPlayerId && tiles[p.squareIndex]?.sdgno === currentTileData.sdgno).length
+        : 0;
 
     const showMobileModal = isMobile && amICurrentPlayer && hasRolled && !hasActed && isProperty;
     const showMobileCountdown = isMobile && countdown !== null && !showMobileModal;
@@ -175,7 +181,7 @@ export default function GameLayout({ socket, gameState }: GameLayoutProps) {
                     </h1>
                     <div className="bg-white px-10 py-5 sm:px-16 sm:py-8 rounded-2xl border-[5px] sm:border-[8px] border-black shadow-[10px_10px_0_rgba(0,0,0,1)] sm:shadow-[16px_16px_0_rgba(0,0,0,1)] transform -rotate-3">
                         <span className="text-5xl sm:text-7xl md:text-9xl font-black" style={{ color: myPlayerColor }}>
-                            {myPlayer?.name || myPlayerColor}
+                            {myPlayerColorName}
                         </span>
                     </div>
                 </div>
@@ -251,6 +257,7 @@ export default function GameLayout({ socket, gameState }: GameLayoutProps) {
                         onPass={handlePass}
                         onUpgrade={handleUpgrade}
                         investmentLevel={currentInvestmentLevel}
+                        synergyCount={synergyCount}
                     />
                 </div>
             )}
@@ -276,7 +283,7 @@ export default function GameLayout({ socket, gameState }: GameLayoutProps) {
             {/* ═══════════════════════════════════════════════ */}
             {!isMobile && (
                 <div className="flex-none xl:h-full z-10 w-[320px] p-4 xl:overflow-y-auto">
-                    <RightSidebar gameState={gameState} />
+                    <RightSidebar gameState={gameState} socket={socket} />
                 </div>
             )}
 
@@ -358,6 +365,7 @@ export default function GameLayout({ socket, gameState }: GameLayoutProps) {
                     onPass={handlePass}
                     onUpgrade={handleUpgrade}
                     investmentLevel={currentInvestmentLevel}
+                    synergyCount={synergyCount}
                 />
             )}
 

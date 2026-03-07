@@ -1,18 +1,54 @@
+import { useState, useEffect } from "react"
+import { motion } from "framer-motion"
 import type { LayoutTile } from "../../game/board/boardLayout"
+import { getDirection } from "./getDirection"
 
 type Direction = "up" | "down" | "left" | "right"
 
 type Props = {
-  tile: LayoutTile
-  direction: Direction
+  targetPosition: number
+  layout: LayoutTile[]
   playerIndex?: number
 }
 
 export default function PlayerToken({
-  tile,
-  direction,
+  targetPosition,
+  layout,
   playerIndex = 0
 }: Props) {
+  const [currentPosition, setCurrentPosition] = useState(targetPosition)
+
+  useEffect(() => {
+    if (targetPosition === currentPosition) return
+
+    const interval = setInterval(() => {
+      setCurrentPosition((prev) => {
+        if (prev === targetPosition) {
+          clearInterval(interval)
+          return prev
+        }
+
+        let diff = targetPosition - prev
+        if (diff < -20) diff += 40
+        if (diff > 20) diff -= 40
+
+        const step = diff > 0 ? 1 : -1
+        const nextPos = (prev + step + 40) % 40
+
+        if (nextPos === targetPosition) {
+          clearInterval(interval)
+        }
+
+        return nextPos
+      })
+    }, 250) // 250ms per tile for standard speed
+
+    return () => clearInterval(interval)
+  }, [targetPosition])
+
+  const tile = layout[currentPosition] || layout[0]
+  const direction = getDirection(tile)
+
   const angleMap: Record<Direction, number> = {
     right: 0,
     up: -90,
@@ -35,7 +71,9 @@ export default function PlayerToken({
   const offsetYDir = playerIndex < 2 ? -1 : 1;
 
   return (
-    <div
+    <motion.div
+      layout
+      transition={{ type: "spring", stiffness: 120, damping: 14 }}
       className="rounded-full flex items-center justify-center z-[200]"
       style={{
         gridColumn: tile.gridColumn,
@@ -46,7 +84,6 @@ export default function PlayerToken({
         height: "clamp(14px, 4cqi, 30px)",
         background: tokenColor,
         boxShadow: "0 6px 12px rgba(0,0,0,0.35), inset -2px -4px 8px rgba(0,0,0,0.2)",
-        transition: "all 0.3s cubic-bezier(0.25, 1, 0.5, 1)"
       }}
     >
       {/* Left Eye */}
@@ -58,6 +95,6 @@ export default function PlayerToken({
       <div className="absolute top-[18%] right-[20%] w-[28%] h-[28%] bg-white rounded-full flex items-center justify-center">
         <div className="w-1/2 h-1/2 bg-black rounded-full" />
       </div>
-    </div>
+    </motion.div>
   )
 }
