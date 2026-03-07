@@ -8,6 +8,7 @@ import TileActionModal from "./HUD/TileActionModal";
 import HeadlineModal from "./HUD/HeadlineModal";
 import CrisisModal from "./HUD/CrisisModal";
 import PeoplesVoiceOverlay from "./HUD/PeoplesVoiceOverlay";
+import UNSummitOverlay from "./HUD/UNSummitOverlay";
 
 import { tiles } from "../game/data/tiles";
 import { BASE_INCOME } from "../game/investRules";
@@ -336,7 +337,6 @@ export default function GameLayout({ socket, gameState }: GameLayoutProps) {
                                                     style={{ backgroundColor: baseColors[idx % baseColors.length] }}
                                                 />
                                                 <span className="truncate max-w-[60px]">{player.name}</span>
-                                                <span>{player.impactPoints}pts</span>
                                             </div>
                                         );
                                     })}
@@ -366,6 +366,7 @@ export default function GameLayout({ socket, gameState }: GameLayoutProps) {
                     onUpgrade={handleUpgrade}
                     investmentLevel={currentInvestmentLevel}
                     synergyCount={synergyCount}
+                    myImpactPoints={myPlayer?.impactPoints || 0}
                 />
             )}
 
@@ -411,6 +412,15 @@ export default function GameLayout({ socket, gameState }: GameLayoutProps) {
                 myPlayerId={myPlayerId}
                 onClose={() => {
                     // Closed PeoplesVoiceOverlay
+                }}
+            />
+
+            <UNSummitOverlay
+                socket={socket}
+                gameState={gameState}
+                myPlayerId={myPlayerId}
+                onClose={() => {
+                    // Closed UNSummitOverlay
                 }}
             />
 

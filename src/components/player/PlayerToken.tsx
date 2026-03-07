@@ -73,13 +73,17 @@ export default function PlayerToken({
   return (
     <motion.div
       layout
+      animate={{
+        rotate: angleMap[direction],
+        x: `calc(${offsetDir} * clamp(4px, 1.2cqi, 10px))`,
+        y: `calc(${offsetYDir} * clamp(4px, 1.2cqi, 10px))`
+      }}
       transition={{ type: "spring", stiffness: 120, damping: 14 }}
       className="rounded-full flex items-center justify-center z-[200]"
       style={{
         gridColumn: tile.gridColumn,
         gridRow: tile.gridRow,
         placeSelf: "center",
-        transform: `translate(calc(${offsetDir} * clamp(4px, 1.2cqi, 10px)), calc(${offsetYDir} * clamp(4px, 1.2cqi, 10px))) rotate(${angleMap[direction]}deg)`,
         width: "clamp(14px, 4cqi, 30px)",
         height: "clamp(14px, 4cqi, 30px)",
         background: tokenColor,
@@ -87,12 +91,12 @@ export default function PlayerToken({
       }}
     >
       {/* Left Eye */}
-      <div className="absolute top-[18%] left-[20%] w-[28%] h-[28%] bg-white rounded-full flex items-center justify-center">
+      <div className="relative mr-2 mb-7 top-[18%] left-[20%] w-[28%] h-[28%] bg-white rounded-full flex items-center justify-center">
         <div className="w-1/2 h-1/2 bg-black rounded-full" />
       </div>
 
       {/* Right Eye */}
-      <div className="absolute top-[18%] right-[20%] w-[28%] h-[28%] bg-white rounded-full flex items-center justify-center">
+      <div className="relative ml-2 mb-7 top-[18%] right-[20%] w-[28%] h-[28%] bg-white rounded-full flex items-center justify-center">
         <div className="w-1/2 h-1/2 bg-black rounded-full" />
       </div>
     </motion.div>

@@ -7,7 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || `http://${window.location.hostname}:3001`;
 const socket: Socket = io(BACKEND_URL);
 
-export type TurnPhase = 'WAITING_FOR_ROLL' | 'WAITING_FOR_ACTION' | 'WAITING_FOR_PEOPLES_VOICE_CHOICE' | 'WAITING_FOR_VOTES' | 'TURN_ENDING';
+export type TurnPhase = 'WAITING_FOR_ROLL' | 'WAITING_FOR_ACTION' | 'WAITING_FOR_PEOPLES_VOICE_CHOICE' | 'WAITING_FOR_VOTES' | 'WAITING_FOR_UN_SUMMIT_VOTES' | 'TURN_ENDING';
 
 export interface LogEntry {
     message: string;
@@ -53,6 +53,14 @@ export interface GameState {
     peoplesVoiceVote?: {
         votes: Record<string, string>;
         required: number;
+    };
+    unSummitVote?: {
+        votes: Record<string, string>;
+        required: number;
+    };
+    activePolicy?: {
+        category: string;
+        roundsLeft: number;
     };
 }
 
@@ -110,6 +118,28 @@ export const useGameSocket = () => {
             toast.warn(`⏰ ${message}`, { theme: "colored" });
         });
 
+        socket.on("un_summit_voting", () => {
+            toast.info("🏛️ The UN Summit has been convened! Time to vote.", { theme: "colored" });
+        });
+
+        socket.on("un_summit_resolved", ({ winningCategory, roundsLeft }) => {
+            toast.success(`🏛️ UN Summit Policy: 50% discount on ${winningCategory} properties for ${roundsLeft} rounds!`, { theme: "colored", autoClose: 5000 });
+        });
+
+        socket.on("economic_boom_resolved", ({ amount }) => {
+            if (amount > 0) {
+                toast.success(`📈 Economic Boom! Largest Education investors earned +${amount}pts!`, { theme: "colored", autoClose: 5000 });
+            }
+        });
+
+        socket.on("player_bankrupt", ({ message }) => {
+            toast.error(`☠️ ${message}`, {
+                theme: "colored",
+                autoClose: 8000,
+                position: "top-center"
+            });
+        });
+
         socket.on("player_kicked", ({ message }) => {
             toast.error(`🚫 ${message}`, { autoClose: false, theme: "colored" });
             sessionStorage.removeItem("terrapoly_roomInfo");
@@ -130,6 +160,10 @@ export const useGameSocket = () => {
             socket.off("turn_timeout");
             socket.off("player_kicked");
             socket.off("player_left");
+            socket.off("un_summit_voting");
+            socket.off("un_summit_resolved");
+            socket.off("economic_boom_resolved");
+            socket.off("player_bankrupt");
         };
     }, []);
 

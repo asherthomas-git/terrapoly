@@ -178,23 +178,25 @@ export default function Lobby({ socket, gameState }: LobbyProps) {
                         </ul>
                     </div>
 
-                    <div className="flex gap-2 mb-5">
-                        <select
-                            className="p-3 text-base border-[3px] border-black rounded font-inherit outline-none focus:ring-2 focus:ring-black/20"
-                            value={botPersonality}
-                            onChange={(e) => setBotPersonality(e.target.value as any)}
-                        >
-                            <option value="Balanced">Balanced Bot</option>
-                            <option value="Greedy">Greedy Bot</option>
-                            <option value="Eco-Warrior">Eco-Warrior Bot</option>
-                        </select>
-                        <button
-                            className="flex-1 p-3 text-base border-[3px] border-black rounded outline-none bg-[#fde047] font-bold cursor-pointer shadow-[4px_4px_0px_#000] transition-transform duration-100 hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_#000]"
-                            onClick={handleAddBot}
-                        >
-                            Add Bot
-                        </button>
-                    </div>
+                    {isOwner && (
+                        <div className="flex gap-2 mb-5">
+                            <select
+                                className="p-3 text-base border-[3px] border-black rounded font-inherit outline-none focus:ring-2 focus:ring-black/20"
+                                value={botPersonality}
+                                onChange={(e) => setBotPersonality(e.target.value as any)}
+                            >
+                                <option value="Balanced">Balanced Bot</option>
+                                <option value="Greedy">Greedy Bot</option>
+                                <option value="Eco-Warrior">Eco-Warrior Bot</option>
+                            </select>
+                            <button
+                                className="flex-1 p-3 text-base border-[3px] border-black rounded outline-none bg-[#fde047] font-bold cursor-pointer shadow-[4px_4px_0px_#000] transition-transform duration-100 hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_#000]"
+                                onClick={handleAddBot}
+                            >
+                                Add Bot
+                            </button>
+                        </div>
+                    )}
 
                     {isOwner ? (
                         <div className="flex flex-col gap-2 border-[3px] border-black p-3 bg-white shadow-[4px_4px_0px_#000] rounded">

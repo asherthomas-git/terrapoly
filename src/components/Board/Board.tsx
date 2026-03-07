@@ -23,9 +23,9 @@ export default function Board({ socket, gameState }: BoardProps) {
   const amICurrentPlayer = currentPlayerInState?.id === myPlayerId;
   const canRoll = amICurrentPlayer && gameState.turnPhase === 'WAITING_FOR_ROLL';
 
-  const handleRoll = () => {
+  const handleRoll = (total: number) => {
     if (!canRoll) return;
-    socket.emit("roll_dice", { roomCode: gameState.room.roomCode, playerId: myPlayerId });
+    socket.emit("roll_dice", { roomCode: gameState.room.roomCode, playerId: myPlayerId, roll: total });
   }
 
   return (

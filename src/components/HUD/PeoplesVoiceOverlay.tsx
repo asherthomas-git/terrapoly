@@ -21,6 +21,16 @@ export default function PeoplesVoiceOverlay({ socket, gameState, myPlayerId, onC
     const [hasVoted, setHasVoted] = useState(false);
     const [closeTimer, setCloseTimer] = useState<number | null>(null);
 
+    const handleClose = () => {
+        setResult(null);
+        setResolvedData(null);
+        setIsFlipped(false);
+        setHasVoted(false);
+        setSelectedCard(null);
+        setCloseTimer(null);
+        onClose();
+    };
+
     useEffect(() => {
         const handleResolved = (data: any) => {
             setResult(data.result);
@@ -37,7 +47,7 @@ export default function PeoplesVoiceOverlay({ socket, gameState, myPlayerId, onC
                 setCloseTimer((prev) => prev !== null ? prev - 1 : null);
             }, 1000);
         } else if (closeTimer === 0) {
-            onClose();
+            handleClose();
         }
 
         return () => {
@@ -46,6 +56,34 @@ export default function PeoplesVoiceOverlay({ socket, gameState, myPlayerId, onC
         };
     }, [socket, onClose, closeTimer]);
 
+    const isOwner = gameState.ownerId === myPlayerId;
+
+    // Auto-vote for bots if I am the host
+    useEffect(() => {
+        if (gameState.turnPhase === 'WAITING_FOR_VOTES' && isOwner && !result) {
+            const bots = gameState.players.filter(p => p.isBot && p.id !== currentPlayer?.id);
+            const categories = ['Climate', 'Education', 'Health', 'Energy', 'Justice'];
+
+            const timeouts: ReturnType<typeof setTimeout>[] = [];
+            bots.forEach((bot, index) => {
+                const delay = 1000 + Math.random() * 2000 + (index * 500);
+                const t = setTimeout(() => {
+                    const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+                    socket.emit('submit_peoples_voice_vote', {
+                        roomCode: gameState.room.roomCode,
+                        playerId: bot.id,
+                        category: randomCategory
+                    });
+                }, delay);
+                timeouts.push(t);
+            });
+
+            return () => {
+                timeouts.forEach(clearTimeout);
+            };
+        }
+    }, [gameState.turnPhase, isOwner, currentPlayer?.id, result, socket, gameState.room.roomCode, gameState.players]);
+
     const handleCardClick = (index: number) => {
         if (!amICurrentPlayer) return;
         if (selectedCard !== null) return;
@@ -53,8 +91,6 @@ export default function PeoplesVoiceOverlay({ socket, gameState, myPlayerId, onC
 
         setSelectedCard(index);
 
-        // Randomly determine choice locally to send to server. The backend actually depends on what we send.
-        // Wait, the backend accepts `choice` from frontend. Let's send random choice.
         const choice = Math.random() < 0.5 ? 'praise' : 'demand';
         socket.emit('peoples_voice_choice', {
             roomCode: gameState.room.roomCode,
@@ -74,7 +110,7 @@ export default function PeoplesVoiceOverlay({ socket, gameState, myPlayerId, onC
     };
 
     if (gameState.turnPhase !== 'WAITING_FOR_PEOPLES_VOICE_CHOICE' && gameState.turnPhase !== 'WAITING_FOR_VOTES' && !result) {
-        return null;
+        return null; // Return null when it should be hidden
     }
 
     // Modal styles
@@ -211,7 +247,7 @@ export default function PeoplesVoiceOverlay({ socket, gameState, myPlayerId, onC
                                         <span className="font-bold text-red-600">{currentPlayer?.name}</span> was forced to donate!
                                     </p>
                                     <div className="mt-4 font-black text-red-600 text-2xl">
-                                        -{resolvedData?.amount} pts
+                                        {currentPlayer?.id === myPlayerId ? `-${resolvedData?.amount} pts` : `${currentPlayer?.name} lost ${resolvedData?.amount} pts`}
                                     </div>
                                 </div>
                             </>
@@ -230,7 +266,7 @@ export default function PeoplesVoiceOverlay({ socket, gameState, myPlayerId, onC
 
                         <div className="mt-8 flex flex-col items-center gap-2">
                             <button
-                                onClick={onClose}
+                                onClick={handleClose}
                                 className="px-6 py-2 bg-amber-900 text-white font-bold rounded-lg uppercase tracking-wide shadow-[4px_4px_0_rgba(69,26,3,1)] hover:-translate-y-1 hover:shadow-[4px_6px_0_rgba(69,26,3,1)] active:translate-y-1 active:shadow-none transition-all"
                             >
                                 Close

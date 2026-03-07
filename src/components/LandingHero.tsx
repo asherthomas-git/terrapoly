@@ -270,11 +270,11 @@ export default function LandingHero({ onPlay }: LandingHeroProps) {
                     >
                         <div className="bg-[#ff90e8] min-w-[3rem] h-12 flex items-center justify-center font-black text-2xl border-4 border-black shadow-[4px_4px_0px_#000] transform -rotate-1">3</div>
                         <div>
-                            <h3 className="text-2xl font-black uppercase mb-2">SDG Synergies</h3>
+                            <h3 className="text-2xl font-black uppercase mb-2">SDG Portfolio</h3>
                             <p className="text-lg font-bold opacity-80">
                                 This is the core strategy! Every property belongs to a specific <b>UN Sustainable Development Goal (SDG)</b>.
                                 <br /><br />
-                                By collecting multiple projects within the exact same SDG number, you unlock massive <b>Synergy Multipliers</b>. The Right Sidebar visually groups your properties into SDG Portfolios. Maximize your synergy to out-score everyone else!
+                                The Right Sidebar visually groups your properties into SDG Portfolios. Collaborate to take the global score beyond the threshold while also competing to outscore your opponents!
                             </p>
                         </div>
                     </motion.div>
