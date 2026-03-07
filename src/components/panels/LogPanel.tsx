@@ -20,7 +20,7 @@ const panelBase: React.CSSProperties = {
 const panelBottom: React.CSSProperties = {
   ...panelBase,
   width: "80%",
-  height: "30%"
+  height: "10%"
 
 }
 

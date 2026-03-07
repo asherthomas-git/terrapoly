@@ -16,6 +16,9 @@ export default function App() {
 
   const currentPlayer = players[currentTurn]
 
+  // 🎯 Tile player is currently on
+  const currentTile = tiles[currentPlayer.position]
+
   // 💰 Earnings per level
   const getEarning = (level: number) => {
     if (level === 1) return 10
@@ -23,6 +26,9 @@ export default function App() {
     if (level === 3) return 60
     return 0
   }
+
+  // 💵 Property base cost (seed funding)
+  const getCost = () => 100
 
   // 🏗 Owned properties detailed view
   const ownedTilesDetailed = currentPlayer.ownedTiles.map(t => {
@@ -41,7 +47,25 @@ export default function App() {
     <div style={pageLayout}>
       {/* LEFT PANEL */}
       <div style={sidePanelStyle}>
-        <PropertyPanel />
+        <PropertyPanel
+          name={currentTile.name}
+          desc={currentTile.desc}
+          cost={getCost()}
+          earn={getEarning(1)}
+          sdg={currentTile.sdgno}
+          region={currentTile.region}
+          category={currentTile.prop}
+          categoryColor={currentTile.catsec}
+          icon={
+            currentTile.icon && (
+              <img
+                src={currentTile.icon}
+                alt=""
+                style={{ width: 80, height: 80, objectFit: "contain" }}
+              />
+            )
+          }
+        />
         <LogPanel />
       </div>
 

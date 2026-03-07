@@ -9,6 +9,7 @@ type Props = {
   categoryColor?: string
   icon?: React.ReactNode
 }
+
 export default function PropertyPanel({
   name,
   desc,
@@ -20,44 +21,58 @@ export default function PropertyPanel({
   categoryColor,
   icon
 }: Props) {
+  const isProperty = !!cost
+
+  if (!name) {
+    return (
+      <div style={{ ...panel, width: "80%" }}>
+        <div style={title}>No Tile Selected</div>
+      </div>
+    )
+  }
+
   return (
-    <div style={{ ...panel, background: categoryColor, border: "1px solid black", width: "80%" }}>
-      
+    <div style={{ ...panel, background: categoryColor, border: "1px solid black", width: "80%",display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+      <div style={{display: "flex", flexDirection: "column",height: "80%", justifyContent: "space-around", alignItems: "center"}}>
       {/* CATEGORY */}
-      <div style={categoryPill}>{category}</div>
+      {category && <div style={categoryPill}>{category}</div>}
 
       {/* ICON SLOT */}
-      <div style={iconBox}>
-        {icon}
-      </div>
+      {icon && <div style={iconBox}>{icon}</div>}
 
       {/* TITLE */}
       <div style={title}>{name}</div>
 
       {/* DESCRIPTION */}
-      <div style={descStyle}>{desc}</div>
+      {desc && <div style={descStyle}>{desc}</div>}
 
       {/* TAGS */}
       <div style={tagRow}>
-        <div style={tag}>{sdg}</div>
-        <div style={tag}>{region}</div>
+        {sdg && <div style={tag}>{sdg}</div>}
+        {region && <div style={tag}>{region}</div>}
       </div>
 
       {/* COST */}
-      <div style={costStyle}>COST: {cost} pts</div>
-      <div style={earnStyle}>EARN: {earn} pts / round</div>
-
+      {isProperty && (
+        <>
+          <div style={costStyle}>COST: {cost} pts</div>
+          <div style={earnStyle}>EARN: {earn} pts / round</div>
+        </>
+      )}
+        </div>
       {/* ACTIONS */}
-      <div style={actions}>
-        <button style={buyBtn}>BUY</button>
-        <button style={skipBtn}>SKIP</button>
-      </div>
+      {isProperty && (
+        <div style={actions}>
+          <button style={buyBtn}>BUY</button>
+          <button style={skipBtn}>SKIP</button>
+        </div>
+      )}
     </div>
   )
 }
 
 const panel: React.CSSProperties = {
-  height: "50%",
+  height: "70%",
   padding: "24px",
   color: "black",
   display: "flex",
@@ -125,13 +140,11 @@ const earnStyle: React.CSSProperties = {
 const actions: React.CSSProperties = {
   display: "flex",
   justifyContent: "space-around",
-//   gap: 12,
   width: "100%",
   marginTop: 12
 }
 
 const buyBtn: React.CSSProperties = {
-//   flex: 1,
   width: "35%",
   background: "#ef4444",
   color: "white",
@@ -143,7 +156,6 @@ const buyBtn: React.CSSProperties = {
 }
 
 const skipBtn: React.CSSProperties = {
-//   flex: 1,
   width: "35%",
   background: "#9ca3af",
   color: "white",
@@ -152,5 +164,4 @@ const skipBtn: React.CSSProperties = {
   fontSize: 22,
   fontWeight: 800,
   cursor: "pointer",
-  
 }

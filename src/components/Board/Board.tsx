@@ -119,7 +119,7 @@ export default function Board({
 
   // 🎨 Same style as Roll Dice button
   const rollButtonStyle: React.CSSProperties = {
-    width: "auto",
+    width: "120px",
     padding: "8px 16px",
     fontSize: "16px",
     fontWeight: "normal",
@@ -198,7 +198,10 @@ export default function Board({
               cursor: canInvest ? "pointer" : "not-allowed"
             }}
           >
-            Invest {investCost}
+            <i
+              className="fa-solid fa-hand-holding-dollar"
+              style={{ color: "rgb(255, 255, 255)", marginRight: "4px" }}
+            /> Invest 
           </button>
 
           <button
