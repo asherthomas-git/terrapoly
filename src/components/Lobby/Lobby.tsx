@@ -86,7 +86,7 @@ export default function Lobby({ socket, gameState }: LobbyProps) {
 
                     <div className="flex items-center my-2">
                         <div className="flex-grow border-t-2 border-dashed border-gray-400"></div>
-                        <span className="px-3 text-gray-500 font-bold uppercase text-sm">Target Code</span>
+                        <span className="px-3 text-gray-500 font-bold uppercase text-sm">Room Code</span>
                         <div className="flex-grow border-t-2 border-dashed border-gray-400"></div>
                     </div>
 

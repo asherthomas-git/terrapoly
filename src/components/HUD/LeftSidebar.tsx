@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import type { GameState } from "../../hooks/useGameSocket";
 import { tiles } from "../../game/data/tiles";
+import { renderLog } from "../../utils/renderLog";
 
 type LeftSidebarProps = {
     gameState: GameState;
@@ -158,7 +159,7 @@ export default function LeftSidebar({
                 <div className="flex-1 overflow-y-auto p-3 text-sm flex flex-col gap-1.5" style={{ scrollbarWidth: 'thin' }}>
                     {gameState.logs?.map((log, i) => (
                         <div key={i} className="bg-white/50 px-2 py-1.5 rounded border border-black/10 shadow-sm whitespace-pre-wrap leading-snug">
-                            {log}
+                            {renderLog(log, myPlayerId, gameState.players)}
                         </div>
                     ))}
                     <div ref={logEndRef} />

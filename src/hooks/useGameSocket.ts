@@ -9,6 +9,11 @@ const socket: Socket = io(BACKEND_URL);
 
 export type TurnPhase = 'WAITING_FOR_ROLL' | 'WAITING_FOR_ACTION' | 'TURN_ENDING';
 
+export interface LogEntry {
+    message: string;
+    players?: { id: string; name: string }[];
+}
+
 export interface GameState {
     room: {
         id: string;
@@ -43,7 +48,7 @@ export interface GameState {
     }[];
     turnPhase: TurnPhase;
     ownerId: string | null;
-    logs: string[];
+    logs: LogEntry[];
 }
 
 export const useGameSocket = () => {

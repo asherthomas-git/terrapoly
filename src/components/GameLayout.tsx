@@ -5,10 +5,13 @@ import Board from "./Board/Board";
 import LeftSidebar from "./HUD/LeftSidebar";
 import RightSidebar from "./HUD/RightSidebar";
 import TileActionModal from "./HUD/TileActionModal";
+import HeadlineModal from "./HUD/HeadlineModal";
+import CrisisModal from "./HUD/CrisisModal";
 
 import { tiles } from "../game/data/tiles";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import { Bot, ScrollText, X } from "lucide-react";
+import { renderLog } from "../utils/renderLog";
 
 type GameLayoutProps = {
     socket: Socket;
@@ -31,6 +34,10 @@ export default function GameLayout({ socket, gameState }: GameLayoutProps) {
     const [mobileScoreExpanded, setMobileScoreExpanded] = useState(false);
     const [mobileLogOpen, setMobileLogOpen] = useState(false);
 
+    // Event Modals State
+    const [activeHeadline, setActiveHeadline] = useState<{ playerId: string, headline: any } | null>(null);
+    const [activeCrisis, setActiveCrisis] = useState<{ category: string, crisis: any, interDependentVictims: string[] } | null>(null);
+
     const isMobile = useMediaQuery("(max-width: 1279px)");
 
     const prevTurnIdx = useRef(gameState.room.currentTurnIdx);
@@ -46,6 +53,29 @@ export default function GameLayout({ socket, gameState }: GameLayoutProps) {
         }
     }, [gameState.logs, mobileLogOpen]);
 
+    // Socket Event Listeners for Modals
+    useEffect(() => {
+        socket.on('headline_drawn', (data) => {
+            // Only show modal to the player who drew it
+            if (data.playerId === myPlayerId) {
+                setActiveHeadline(data);
+                // Pause countdown if any
+                if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
+            }
+        });
+
+        socket.on('crisis_triggered', (data) => {
+            setActiveCrisis(data);
+            // Pause countdown if any
+            if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
+        });
+
+        return () => {
+            socket.off('headline_drawn');
+            socket.off('crisis_triggered');
+        };
+    }, [socket, myPlayerId]);
+
     // Reset countdown when turn changes
     useEffect(() => {
         if (gameState.room.currentTurnIdx !== prevTurnIdx.current) {
@@ -56,11 +86,12 @@ export default function GameLayout({ socket, gameState }: GameLayoutProps) {
     }, [gameState.room.currentTurnIdx]);
 
     // Start client-side countdown when server says TURN_ENDING and it's my turn
+    // ONLY if there are no active modals
     useEffect(() => {
-        if (amICurrentPlayer && turnPhase === 'TURN_ENDING' && countdown === null) {
+        if (amICurrentPlayer && turnPhase === 'TURN_ENDING' && countdown === null && !activeHeadline && !activeCrisis) {
             startCountdown();
         }
-    }, [turnPhase, amICurrentPlayer]);
+    }, [turnPhase, amICurrentPlayer, activeHeadline, activeCrisis]);
 
     const propertyOwner = gameState.properties.find(p => p.squareIndex === currentTileIndex)?.ownerId;
     const isOwnedByMe = propertyOwner === myPlayerId;
@@ -152,7 +183,7 @@ export default function GameLayout({ socket, gameState }: GameLayoutProps) {
                                     className="text-xs font-black truncate max-w-[60px]"
                                     style={{ color: baseColors[gameState.room.currentTurnIdx % baseColors.length] }}
                                 >
-                                    {currentPlayerInState?.name}
+                                    {currentPlayerInState?.id === myPlayerId ? 'You' : currentPlayerInState?.name}
                                 </div>
                             </div>
                             <button
@@ -222,7 +253,7 @@ export default function GameLayout({ socket, gameState }: GameLayoutProps) {
                         {/* Collapsed: compact one-line strip */}
                         <div className="flex justify-between items-center text-black font-black">
                             <span className="flex items-center gap-1 truncate text-sm">
-                                {myPlayer?.name}
+                                {myPlayer?.id === myPlayerId ? 'You' : myPlayer?.name}
                                 {myPlayer?.isBot && <Bot className="w-3 h-3" />}
                             </span>
                             <span className="text-sm whitespace-nowrap">{myPlayer?.impactPoints} pts</span>
@@ -312,13 +343,40 @@ export default function GameLayout({ socket, gameState }: GameLayoutProps) {
                         <div className="flex-1 overflow-y-auto p-3 text-sm flex flex-col gap-1.5 bg-[#154c37] bg-[url('/background.png')] bg-cover" style={{ scrollbarWidth: 'thin' }}>
                             {gameState.logs?.map((log, i) => (
                                 <div key={i} className="bg-[#fcf8f2] px-3 py-2 rounded border-2 border-black shadow-[2px_2px_0_rgba(0,0,0,1)] whitespace-pre-wrap leading-snug font-bold text-black border-l-4 border-l-orange-500">
-                                    {log}
+                                    {renderLog(log, myPlayerId, gameState.players)}
                                 </div>
                             ))}
                             <div ref={mobileLogEndRef} className="h-4 flex-none" />
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* ═══════════════════════════════════════════════ */}
+            {/* EVENT MODALS (Desktop & Mobile)                 */}
+            {/* ═══════════════════════════════════════════════ */}
+            {activeHeadline && activeHeadline.playerId === myPlayerId && (
+                <HeadlineModal
+                    headline={activeHeadline.headline}
+                    onClose={() => {
+                        setActiveHeadline(null);
+                        // Resume countdown logic via useEffect
+                    }}
+                />
+            )}
+
+            {activeCrisis && (
+                <CrisisModal
+                    category={activeCrisis.category}
+                    crisis={activeCrisis.crisis}
+                    interDependentVictims={activeCrisis.interDependentVictims || []}
+                    myPlayerId={myPlayerId || ''}
+                    players={gameState.players}
+                    onClose={() => {
+                        setActiveCrisis(null);
+                        // Resume countdown logic via useEffect
+                    }}
+                />
             )}
         </div>
     );

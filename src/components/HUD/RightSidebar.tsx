@@ -54,8 +54,8 @@ export default function RightSidebar({ gameState }: RightSidebarProps) {
                             >
                                 {/* Player Header */}
                                 <div className="flex justify-between items-center p-3 bg-white/20 border-b-2 border-black/20 text-black font-black">
-                                    <span className="truncate flex items-center gap-2" title={player.name}>
-                                        {player.name} {player.isBot && <Bot className="w-4 h-4" />}
+                                    <span className="truncate flex items-center gap-2" title={player.id === myPlayerId ? 'You' : player.name}>
+                                        {player.id === myPlayerId ? 'You' : player.name} {player.isBot && <Bot className="w-4 h-4" />}
                                     </span>
                                     <span className="whitespace-nowrap">{player.impactPoints} pts</span>
                                 </div>

@@ -26,14 +26,15 @@ export default function Board({ socket, gameState }: BoardProps) {
   }
 
   return (
-    <div className="w-full h-full flex justify-center items-center pointer-events-auto" style={{ containerType: "inline-size" }}>
+    <div className="w-full h-full flex justify-center items-center pointer-events-auto" style={{ containerType: "size" }}>
       <div
         className="relative grid bg-[#0e1621] outline outline-2 outline-[#0e1621] aspect-square"
         style={{
           gridTemplateColumns: "1.6fr repeat(9, 1fr) 1.6fr",
           gridTemplateRows: "1.6fr repeat(9, 1fr) 1.6fr",
           gap: "2px",
-          width: "min(100%, 100%)",
+          width: "min(100cqmin, 100%)",
+          height: "min(100cqmin, 100%)",
           maxWidth: "100%",
           maxHeight: "100%",
         }}
@@ -85,10 +86,23 @@ export default function Board({ socket, gameState }: BoardProps) {
 
         {/* 🎲 Dice inside center board */}
         <div
-          className="z-[100] flex justify-center items-center"
+          className="z-[100] flex flex-col justify-center items-center gap-4"
           style={{ gridColumn: "4 / 9", gridRow: "4 / 9" }}
         >
           <Dice onRoll={handleRoll} disabled={!canRoll} />
+
+          {currentPlayerInState && (
+            <div
+              className="text-lg md:text-2xl lg:text-3xl font-black uppercase tracking-wider text-center"
+              style={{
+                color: ["#ff5e5e", "#5ea1ff", "#5eff9b", "#ffd45e"][gameState.room.currentTurnIdx % 4],
+                WebkitTextStroke: "1px black",
+                textShadow: "2px 2px 0 #000"
+              }}
+            >
+              {amICurrentPlayer ? "Your Turn" : `${currentPlayerInState.name}'s Turn`}
+            </div>
+          )}
         </div>
       </div>
     </div>

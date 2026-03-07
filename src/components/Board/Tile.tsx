@@ -8,7 +8,7 @@ type Props = {
   level?: number;
 };
 
-export default function Tile({ tile, data, ownerColor, level }: Props) {
+export default function Tile({ tile, data, ownerColor }: Props) {
   const isProperty = data.type === "property";
   const isCorner = ["start", "jail", "goToJail", "parking"].includes(data.type || "");
   const isEdgeTile = !isCorner;
