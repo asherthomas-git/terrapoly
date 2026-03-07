@@ -3,7 +3,7 @@ import { Dices } from "lucide-react";
 
 type Props = {
   onRoll: (total: number) => void;
-  disabled?: boolean; // ✅ NEW
+  disabled?: boolean;
 };
 
 export default function Dice({ onRoll, disabled }: Props) {
@@ -12,7 +12,7 @@ export default function Dice({ onRoll, disabled }: Props) {
   const [rolling, setRolling] = useState(false);
 
   const rollDice = () => {
-    if (rolling || disabled) return; // ✅ UPDATED
+    if (rolling || disabled) return;
 
     console.log("🎲 Roll button clicked");
     setRolling(true);
@@ -66,8 +66,12 @@ export default function Dice({ onRoll, disabled }: Props) {
 
     return (
       <div
-        className="absolute w-[60px] h-[60px] bg-[#fdfdfd] rounded-xl shadow-[inset_0_0_0_1px_#ddd,inset_0_0_15px_rgba(0,0,0,0.1)] [backface-visibility:hidden] p-2 box-border"
-        style={{ transform }}
+        className="absolute bg-[#fdfdfd] rounded-xl shadow-[inset_0_0_0_1px_#ddd,inset_0_0_15px_rgba(0,0,0,0.1)] [backface-visibility:hidden] p-2 box-border"
+        style={{
+          transform,
+          width: "clamp(35px, 12cqi, 60px)",
+          height: "clamp(35px, 12cqi, 60px)",
+        }}
       >
         <div className="grid grid-cols-3 grid-rows-3 w-full h-full">
           {[...Array(9)].map((_, i) => (
@@ -81,35 +85,36 @@ export default function Dice({ onRoll, disabled }: Props) {
   };
 
   const Cube = ({ value }: { value: number }) => (
-    <div className="w-[60px] h-[60px] mx-auto perspective-[600px]">
+    <div style={{ width: "clamp(35px, 12cqi, 60px)", height: "clamp(35px, 12cqi, 60px)", perspective: "600px" }}>
       <div
         className="w-full h-full relative transition-[transform] duration-150 ease-out [transform-style:preserve-3d]"
         style={{ transform: getRotation(value) }}
       >
-        <Face value={1} transform="rotateY(0deg) translateZ(30px)" />
-        <Face value={6} transform="rotateX(180deg) translateZ(30px)" />
-        <Face value={3} transform="rotateY(90deg) translateZ(30px)" />
-        <Face value={4} transform="rotateY(-90deg) translateZ(30px)" />
-        <Face value={2} transform="rotateX(90deg) translateZ(30px)" />
-        <Face value={5} transform="rotateX(-90deg) translateZ(30px)" />
+        <Face value={1} transform="rotateY(0deg) translateZ(calc(clamp(35px, 12cqi, 60px) / 2))" />
+        <Face value={6} transform="rotateX(180deg) translateZ(calc(clamp(35px, 12cqi, 60px) / 2))" />
+        <Face value={3} transform="rotateY(90deg) translateZ(calc(clamp(35px, 12cqi, 60px) / 2))" />
+        <Face value={4} transform="rotateY(-90deg) translateZ(calc(clamp(35px, 12cqi, 60px) / 2))" />
+        <Face value={2} transform="rotateX(90deg) translateZ(calc(clamp(35px, 12cqi, 60px) / 2))" />
+        <Face value={5} transform="rotateX(-90deg) translateZ(calc(clamp(35px, 12cqi, 60px) / 2))" />
       </div>
     </div>
   );
 
   return (
-    <div className="text-center py-16 px-5">
-      <div className="flex gap-[60px] justify-center">
+    <div className="flex flex-col items-center justify-center gap-3 py-2">
+      <div className="flex gap-4 justify-center">
         <Cube value={dice1} />
         <Cube value={dice2} />
       </div>
 
       <button
         onClick={rollDice}
-        disabled={rolling || disabled} // ✅ UPDATED
-        className={`w-[140px] mt-[30px] py-2 px-6 text-base font-normal text-white rounded transition-all duration-200 bg-[rgba(74,146,240,0.49)] backdrop-blur-md border border-[rgba(35,90,178,0.15)] shadow-[0_4px_20px_rgba(0,0,0,0.4)] font-nunito ${rolling || disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"
+        disabled={rolling || disabled}
+        className={`mt-1 py-2 px-4 text-sm font-normal text-white rounded transition-all duration-200 bg-[rgba(74,146,240,0.49)] backdrop-blur-md border border-[rgba(35,90,178,0.15)] shadow-[0_4px_20px_rgba(0,0,0,0.4)] font-nunito ${rolling || disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"
           }`}
+        style={{ width: "clamp(90px, 28cqi, 140px)", fontSize: "clamp(11px, 2.8cqi, 16px)" }}
       >
-        <Dices className="inline-block mr-2 -mt-1 align-middle" size={20} />
+        <Dices className="inline-block mr-1 -mt-1 align-middle" style={{ width: "clamp(14px, 3.5cqi, 20px)", height: "clamp(14px, 3.5cqi, 20px)" }} />
         {rolling ? "Rolling..." : "Roll Dice"}
       </button>
     </div>

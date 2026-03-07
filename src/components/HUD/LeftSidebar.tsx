@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import type { GameState } from "../../hooks/useGameSocket";
 import { tiles } from "../../game/data/tiles";
 
@@ -47,8 +48,13 @@ export default function LeftSidebar({
 
     const bgColor = getBgColor();
 
+    const logEndRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [gameState.logs]);
+
     return (
-        <div className="w-[320px] h-full flex flex-col gap-4 py-4 pl-4 font-nunito text-black">
+        <div className="w-full h-full flex flex-col gap-4 font-nunito text-black">
             {/* TILE CARD */}
             <div
                 className="flex-[1.5] border-4 border-black shadow-[4px_4px_0px_#000] p-4 flex flex-col relative overflow-hidden"
@@ -128,7 +134,7 @@ export default function LeftSidebar({
                                     className="w-full bg-[#fb923c] text-white font-black text-lg border-4 border-black active:translate-y-1 active:border-b-0 transition-transform shadow-[inset_0_-4px_0_rgba(0,0,0,0.2)]"
                                     onClick={onPayRent}
                                 >
-                                    PAY RENT
+                                    DONATE
                                 </button>
                             ) : (
                                 <div className="w-full bg-black/10 flex items-center justify-center font-bold text-sm border-2 border-black/20 text-black/60 rounded">
@@ -145,8 +151,18 @@ export default function LeftSidebar({
             </div>
 
             {/* LOG */}
-            <div className="bg-[#e5e7eb] flex-[1] border-4 border-black shadow-[4px_4px_0px_#000] p-4 flex flex-col justify-center items-center">
-                <span className="text-3xl font-bold opacity-30 tracking-widest uppercase">LOG</span>
+            <div className="bg-[#e5e7eb] flex-[1] border-4 border-black shadow-[4px_4px_0px_#000] flex flex-col overflow-hidden relative">
+                <div className="bg-black text-white text-xs font-black px-3 py-1 uppercase tracking-widest border-b-2 border-black flex-none">
+                    Game Log
+                </div>
+                <div className="flex-1 overflow-y-auto p-3 text-sm flex flex-col gap-1.5" style={{ scrollbarWidth: 'thin' }}>
+                    {gameState.logs?.map((log, i) => (
+                        <div key={i} className="bg-white/50 px-2 py-1.5 rounded border border-black/10 shadow-sm whitespace-pre-wrap leading-snug">
+                            {log}
+                        </div>
+                    ))}
+                    <div ref={logEndRef} />
+                </div>
             </div>
         </div>
     );

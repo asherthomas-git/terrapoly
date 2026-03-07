@@ -7,6 +7,8 @@ import 'react-toastify/dist/ReactToastify.css';
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || `http://${window.location.hostname}:3001`;
 const socket: Socket = io(BACKEND_URL);
 
+export type TurnPhase = 'WAITING_FOR_ROLL' | 'WAITING_FOR_ACTION' | 'TURN_ENDING';
+
 export interface GameState {
     room: {
         id: string;
@@ -39,6 +41,9 @@ export interface GameState {
         investmentLevel: string;
         bonusReturns: number;
     }[];
+    turnPhase: TurnPhase;
+    ownerId: string | null;
+    logs: string[];
 }
 
 export const useGameSocket = () => {
@@ -47,6 +52,22 @@ export const useGameSocket = () => {
     useEffect(() => {
         socket.on("connect", () => {
             console.log("Connected to game server");
+
+            // Auto-rejoin if we were already in a room (e.g., after hot-reload or brief disconnect)
+            const playerId = localStorage.getItem("terrapoly_id");
+            const roomInfoStr = sessionStorage.getItem("terrapoly_roomInfo");
+
+            if (playerId && roomInfoStr) {
+                try {
+                    const { roomCode, playerName } = JSON.parse(roomInfoStr);
+                    if (roomCode && playerName) {
+                        console.log(`Auto-rejoining room ${roomCode} as ${playerName}`);
+                        socket.emit("join_room", { roomCode, playerName, playerId });
+                    }
+                } catch (e) {
+                    console.error("Failed to parse roomInfo for auto-rejoin", e);
+                }
+            }
         });
 
         socket.on("state_update", (state: GameState) => {
@@ -59,16 +80,15 @@ export const useGameSocket = () => {
             toast.error(err.message || "An error occurred", { theme: "colored" });
         });
 
-        socket.on("player_moved", ({ playerId, position, roll }) => {
+        socket.on("player_moved", ({ roll }) => {
             toast.info(`🎲 Someone rolled a ${roll}!`);
         });
 
-        socket.on("crisis_triggered", ({ category, bystanderId }) => {
-            // Find victim if we have state access (though tricky in a hook closure without deps, we can just generic toast)
+        socket.on("crisis_triggered", ({ category }) => {
             toast.error(`⚠️ CRISIS in ${category}! A player lost 40 points for hoarding!`, { theme: "colored" });
         });
 
-        socket.on("game_over", ({ reason, winnerId }) => {
+        socket.on("game_over", ({ reason }) => {
             if (reason === 'collapse') {
                 toast.error("💀 GAME OVER! The SDGs collapsed!", { autoClose: false });
             } else {
@@ -76,12 +96,30 @@ export const useGameSocket = () => {
             }
         });
 
+        socket.on("turn_timeout", ({ message }) => {
+            toast.warn(`⏰ ${message}`, { theme: "colored" });
+        });
+
+        socket.on("player_kicked", ({ message }) => {
+            toast.error(`🚫 ${message}`, { autoClose: false, theme: "colored" });
+            sessionStorage.removeItem("terrapoly_roomInfo");
+            setGameState(null);
+        });
+
+        socket.on("player_left", ({ playerName }) => {
+            toast.warn(`👋 ${playerName} has left the game.`, { theme: "colored" });
+        });
+
         return () => {
             socket.off("connect");
             socket.off("state_update");
+            socket.off("error");
             socket.off("player_moved");
             socket.off("crisis_triggered");
             socket.off("game_over");
+            socket.off("turn_timeout");
+            socket.off("player_kicked");
+            socket.off("player_left");
         };
     }, []);
 

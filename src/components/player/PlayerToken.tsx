@@ -13,11 +13,6 @@ export default function PlayerToken({
   direction,
   playerIndex = 0
 }: Props) {
-  const size = 28
-
-  const centerX = tile.x + tile.width / 2
-  const centerY = tile.y + tile.height / 2
-
   const angleMap: Record<Direction, number> = {
     right: 0,
     up: -90,
@@ -35,15 +30,20 @@ export default function PlayerToken({
 
   const tokenColor = playerColors[playerIndex % playerColors.length]
 
+  // Responsive offsets using cqi-relative values
+  const offsetDir = playerIndex % 2 === 0 ? -1 : 1;
+  const offsetYDir = playerIndex < 2 ? -1 : 1;
+
   return (
     <div
-      className="absolute rounded-full flex items-center justify-center z-[200]"
+      className="rounded-full flex items-center justify-center z-[200]"
       style={{
-        left: centerX,
-        top: centerY,
-        transform: `translate(-50%, -50%) rotate(${angleMap[direction]}deg)`,
-        width: size,
-        height: size,
+        gridColumn: tile.gridColumn,
+        gridRow: tile.gridRow,
+        placeSelf: "center",
+        transform: `translate(calc(${offsetDir} * clamp(4px, 1.2cqi, 10px)), calc(${offsetYDir} * clamp(4px, 1.2cqi, 10px))) rotate(${angleMap[direction]}deg)`,
+        width: "clamp(14px, 4cqi, 30px)",
+        height: "clamp(14px, 4cqi, 30px)",
         background: tokenColor,
         boxShadow: "0 6px 12px rgba(0,0,0,0.35), inset -2px -4px 8px rgba(0,0,0,0.2)",
         transition: "all 0.3s cubic-bezier(0.25, 1, 0.5, 1)"

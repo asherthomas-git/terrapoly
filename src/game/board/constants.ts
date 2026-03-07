@@ -2,9 +2,9 @@
 // export const SIDE_LENGTH = 140;     // now board ring thickness
 // export const CORNER_SIZE = 140;
 
-export const SIDE_THICKNESS = 58;
-export const SIDE_LENGTH = 100;
-export const CORNER_SIZE = 100;
+export const SIDE_THICKNESS = 80;
+export const SIDE_LENGTH = 125;
+export const CORNER_SIZE = 125;
 
 export const TOTAL_TILES = 40;
 
