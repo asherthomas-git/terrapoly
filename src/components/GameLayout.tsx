@@ -9,6 +9,7 @@ import HeadlineModal from "./HUD/HeadlineModal";
 import CrisisModal from "./HUD/CrisisModal";
 
 import { tiles } from "../game/data/tiles";
+import { BASE_INCOME } from "../game/investRules";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import { Bot, ScrollText, X } from "lucide-react";
 import { renderLog } from "../utils/renderLog";
@@ -33,6 +34,8 @@ export default function GameLayout({ socket, gameState }: GameLayoutProps) {
     const [countdown, setCountdown] = useState<number | null>(null);
     const [mobileScoreExpanded, setMobileScoreExpanded] = useState(false);
     const [mobileLogOpen, setMobileLogOpen] = useState(false);
+    const [showIntro, setShowIntro] = useState(true);
+    const [introOpacity, setIntroOpacity] = useState(1);
 
     // Event Modals State
     const [activeHeadline, setActiveHeadline] = useState<{ playerId: string, headline: any } | null>(null);
@@ -52,6 +55,15 @@ export default function GameLayout({ socket, gameState }: GameLayoutProps) {
             }, 10);
         }
     }, [gameState.logs, mobileLogOpen]);
+
+    useEffect(() => {
+        const fadeTimer = setTimeout(() => setIntroOpacity(0), 1500);
+        const unmountTimer = setTimeout(() => setShowIntro(false), 2500);
+        return () => {
+            clearTimeout(fadeTimer);
+            clearTimeout(unmountTimer);
+        };
+    }, []);
 
     // Socket Event Listeners for Modals
     useEffect(() => {
@@ -129,19 +141,44 @@ export default function GameLayout({ socket, gameState }: GameLayoutProps) {
         socket.emit("pass_action", { roomCode: gameState.room.roomCode, playerId: myPlayerId, squareIndex: currentTileIndex });
     };
 
+    const handleUpgrade = () => {
+        if (hasActed) return;
+        socket.emit("upgrade_property", { roomCode: gameState.room.roomCode, playerId: myPlayerId, squareIndex: currentTileIndex });
+    };
+
     // player info for mobile HUD
     const baseColors = ["#ff5e5e", "#5ea1ff", "#5eff9b", "#ffd45e"];
     const myPlayer = gameState.players.find(p => p.id === myPlayerId);
     const myPlayerIdx = gameState.players.findIndex(p => p.id === myPlayerId);
     const myPlayerColor = baseColors[myPlayerIdx % baseColors.length];
 
-    const showMobileModal = isMobile && amICurrentPlayer && hasRolled && !hasActed && isProperty && !isOwnedByMe;
+    const currentPropertyData = gameState.properties.find(p => p.squareIndex === currentTileIndex);
+    const currentInvestmentLevel = currentPropertyData?.investmentLevel || 'SEED';
+
+    const showMobileModal = isMobile && amICurrentPlayer && hasRolled && !hasActed && isProperty;
     const showMobileCountdown = isMobile && countdown !== null && !showMobileModal;
 
     return (
         <div className="w-full h-[100dvh] overflow-hidden flex flex-col xl:flex-row justify-center xl:justify-between items-center bg-[#154c37] bg-[url('/background.png')] bg-cover bg-center bg-no-repeat relative">
             {/* Background overlay */}
             <div className="absolute inset-0 bg-black/40 z-0 pointer-events-none" />
+
+            {/* INTRO FULL SCREEN */}
+            {showIntro && (
+                <div
+                    className="fixed inset-0 z-[99999] flex flex-col justify-center items-center pointer-events-none"
+                    style={{ backgroundColor: myPlayerColor, opacity: introOpacity, transition: "opacity 1s ease-in-out" }}
+                >
+                    <h1 className="text-white text-5xl sm:text-7xl md:text-8xl font-black drop-shadow-[6px_6px_0_rgba(0,0,0,1)] tracking-widest uppercase mb-8 sm:mb-10 text-center px-4 leading-[1.1]">
+                        You are
+                    </h1>
+                    <div className="bg-white px-10 py-5 sm:px-16 sm:py-8 rounded-2xl border-[5px] sm:border-[8px] border-black shadow-[10px_10px_0_rgba(0,0,0,1)] sm:shadow-[16px_16px_0_rgba(0,0,0,1)] transform -rotate-3">
+                        <span className="text-5xl sm:text-7xl md:text-9xl font-black" style={{ color: myPlayerColor }}>
+                            {myPlayer?.name || myPlayerColor}
+                        </span>
+                    </div>
+                </div>
+            )}
 
             {/* ═══════════════════════════════════════════════ */}
             {/* MOBILE TOP HUD — World Score compact bar        */}
@@ -211,6 +248,8 @@ export default function GameLayout({ socket, gameState }: GameLayoutProps) {
                         onInvest={handleInvest}
                         onPayRent={handlePayRent}
                         onPass={handlePass}
+                        onUpgrade={handleUpgrade}
+                        investmentLevel={currentInvestmentLevel}
                     />
                 </div>
             )}
@@ -272,7 +311,7 @@ export default function GameLayout({ socket, gameState }: GameLayoutProps) {
                                 <div className="flex justify-between items-center bg-white/40 px-3 py-1.5 rounded border border-black/10">
                                     <span className="opacity-80 text-xs">Return Rate</span>
                                     <span className="font-black text-green-900">
-                                        +{gameState.properties.filter(p => p.ownerId === myPlayerId).length * 15} pts/round
+                                        +{gameState.properties.filter(p => p.ownerId === myPlayerId).reduce((acc, p) => acc + BASE_INCOME + p.bonusReturns, 0)} pts/round
                                     </span>
                                 </div>
                                 {/* Other players */}
@@ -316,6 +355,8 @@ export default function GameLayout({ socket, gameState }: GameLayoutProps) {
                     onInvest={handleInvest}
                     onPayRent={handlePayRent}
                     onPass={handlePass}
+                    onUpgrade={handleUpgrade}
+                    investmentLevel={currentInvestmentLevel}
                 />
             )}
 

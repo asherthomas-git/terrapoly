@@ -2,6 +2,8 @@ import { useEffect, useRef } from "react";
 import type { GameState } from "../../hooks/useGameSocket";
 import { tiles } from "../../game/data/tiles";
 import { renderLog } from "../../utils/renderLog";
+import { BUY_COST, UPGRADE_COST, EXPECTED_RETURN, LEVEL_LABELS } from "../../game/investRules";
+import { Flag, Siren, Landmark, Building2, Navigation, Car, Ticket } from "lucide-react";
 
 type LeftSidebarProps = {
     gameState: GameState;
@@ -12,6 +14,8 @@ type LeftSidebarProps = {
     onInvest: () => void;
     onPayRent: () => void;
     onPass: () => void;
+    onUpgrade: () => void;
+    investmentLevel: string;
 };
 
 export default function LeftSidebar({
@@ -22,7 +26,9 @@ export default function LeftSidebar({
     hasActed,
     onInvest,
     onPayRent,
-    onPass
+    onPass,
+    onUpgrade,
+    investmentLevel
 }: LeftSidebarProps) {
     const currentPlayer = gameState.players[gameState.room.currentTurnIdx];
     const amICurrentPlayer = currentPlayer?.id === myPlayerId;
@@ -38,16 +44,29 @@ export default function LeftSidebar({
     const getBgColor = () => {
         if (!isProperty) return "#e5e7eb"; // Gray for Non-properties
         switch (tileData.cat) {
-            case "green": return "#4ade80";
-            case "yellow": return "#fde047";
-            case "blue": return "#93c5fd";
-            case "orange": return "#fb923c";
-            case "purple": return "#c084fc";
+            case "#26B68A": return "#4ade80";
+            case "#E6A70A": return "#fde047";
+            case "#2B77C2": return "#93c5fd";
+            case "#E4693F": return "#fb923c";
+            case "#DBADCA": return "#c084fc";
             default: return "#e5e7eb";
         }
     };
 
+    const getCategoryName = (cat?: string) => {
+        if (!cat) return "SPECIAL";
+        if (cat === "#26B68A") return "ENVIRONMENT";
+        if (cat === "#E6A70A") return "SOCIETY";
+        if (cat === "#2B77C2") return "WELL-BEING";
+        if (cat === "#E4693F") return "INFRASTRUCTURE";
+        if (cat === "#DBADCA") return "GOVERNANCE";
+        if (cat === "event") return "EVENT";
+        if (cat === "corner") return "SPECIAL";
+        return cat.toUpperCase();
+    };
+
     const bgColor = getBgColor();
+    const categoryName = getCategoryName(tileData.cat);
 
     const logEndRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
@@ -63,12 +82,20 @@ export default function LeftSidebar({
             >
                 {/* CATEGORY TAG */}
                 <div className="bg-black text-white text-xs font-bold px-4 py-1 rounded-full self-center uppercase tracking-widest mb-4 z-10">
-                    {tileData.cat || "SPECIAL"}
+                    {categoryName}
                 </div>
 
                 {/* ICON / VISUAL */}
                 <div className="flex-1 flex items-center justify-center z-10">
-                    <div className="text-6xl">{tileData.type === 'start' ? '🏁' : tileData.type === 'jail' ? '🚔' : tileData.type === 'tax' ? '💸' : '🏢'}</div>
+                    <div className="text-black/80">
+                        {tileData.type === 'start' ? <Flag size={64} /> :
+                            tileData.type === 'jail' || tileData.type === 'goToJail' ? <Siren size={64} /> :
+                                tileData.type === 'tax' ? <Landmark size={64} /> :
+                                    tileData.type === 'chance' || tileData.type === 'treasure' ? <Ticket size={64} /> :
+                                        tileData.type === 'parking' ? <Car size={64} /> :
+                                            tileData.type === 'airport' || tileData.type === 'utility' ? <Navigation size={64} /> :
+                                                <Building2 size={64} />}
+                    </div>
                 </div>
 
                 {/* DETAILS */}
@@ -97,10 +124,15 @@ export default function LeftSidebar({
                 {/* PRICING */}
                 {isProperty && (
                     <div className="text-center mb-4 z-10">
-                        <p className="text-lg font-black tracking-tight">COST: 50pts</p>
+                        <p className="text-lg font-black tracking-tight">COST: {isOwnedByMe ? (investmentLevel !== 'FLAGSHIP' ? `${UPGRADE_COST[investmentLevel]}pts` : 'MAX') : `${BUY_COST}pts`}</p>
                         <p className="text-[10px] font-bold uppercase text-black/70">
-                            EARN: 15 pts / round
+                            EARN: {EXPECTED_RETURN[isOwnedByMe ? investmentLevel : 'SEED']} pts / round
                         </p>
+                        {isOwnedByMe && (
+                            <p className="text-[10px] font-bold uppercase text-black/70 mt-1">
+                                Level: {LEVEL_LABELS[investmentLevel] || investmentLevel}
+                            </p>
+                        )}
                     </div>
                 )}
 
@@ -130,17 +162,26 @@ export default function LeftSidebar({
                                         SKIP
                                     </button>
                                 </>
-                            ) : !isOwnedByMe ? (
+                            ) : isOwnedByMe ? (
+                                investmentLevel !== 'FLAGSHIP' ? (
+                                    <button
+                                        className="w-full bg-[#3b82f6] text-white font-black text-lg border-4 border-black active:translate-y-1 active:border-b-0 transition-transform shadow-[inset_0_-4px_0_rgba(0,0,0,0.2)]"
+                                        onClick={onUpgrade}
+                                    >
+                                        UPGRADE ({UPGRADE_COST[investmentLevel]}pts)
+                                    </button>
+                                ) : (
+                                    <div className="w-full bg-emerald-500/30 flex items-center justify-center font-bold text-sm border-2 border-black/20 text-black/80 rounded">
+                                        ⭐ MAX LEVEL
+                                    </div>
+                                )
+                            ) : (
                                 <button
                                     className="w-full bg-[#fb923c] text-white font-black text-lg border-4 border-black active:translate-y-1 active:border-b-0 transition-transform shadow-[inset_0_-4px_0_rgba(0,0,0,0.2)]"
                                     onClick={onPayRent}
                                 >
-                                    DONATE
+                                    DONATE 15
                                 </button>
-                            ) : (
-                                <div className="w-full bg-black/10 flex items-center justify-center font-bold text-sm border-2 border-black/20 text-black/60 rounded">
-                                    YOUR PROPERTY
-                                </div>
                             )}
                         </div>
                     ) : (

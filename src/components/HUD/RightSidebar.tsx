@@ -1,7 +1,11 @@
 import type { GameState } from "../../hooks/useGameSocket";
 import { tiles } from "../../game/data/tiles";
 import SDGBar from "./SDGBar";
-import { Bot } from "lucide-react";
+import { BASE_INCOME, LEVEL_LABELS } from "../../game/investRules";
+import { Bot, Target, BookOpen, LogOut } from "lucide-react";
+import { useState } from "react";
+import SDGListModal from "./SDGListModal";
+import QuickGuideModal from "./QuickGuideModal";
 
 type RightSidebarProps = {
     gameState: GameState;
@@ -15,6 +19,16 @@ export default function RightSidebar({ gameState }: RightSidebarProps) {
     const myPlayer = gameState.players.find(p => p.id === myPlayerId);
     const playersToShow = myPlayer ? [myPlayer] : gameState.players;
 
+    const [showSDGList, setShowSDGList] = useState(false);
+    const [showGuide, setShowGuide] = useState(false);
+
+    const handleLeaveGame = () => {
+        if (window.confirm("Are you sure you want to leave the game?")) {
+            sessionStorage.removeItem("terrapoly_roomInfo");
+            window.location.reload(); // Quickest way to dump state and go to Lobby considering App routing checks this
+        }
+    };
+
     return (
         <div className="w-full h-full flex flex-col gap-4">
             {/* GLOBAL SCORE */}
@@ -27,8 +41,8 @@ export default function RightSidebar({ gameState }: RightSidebarProps) {
             </div>
 
             {/* CURRENT SCORE */}
-            <div className="flex-1 p-4 flex flex-col overflow-y-auto">
-                <h2 className="text-xl font-bold text-center text-white mb-4 uppercase tracking-wide">My Score</h2>
+            <div className="w-full flex-col overflow-hidden">
+                <h2 className="mt-1 non-scrollable text-xl font-bold text-center text-white mb-4 uppercase tracking-wide">My Score</h2>
 
                 <div className="flex flex-col gap-4">
                     {playersToShow.map((player) => {
@@ -38,8 +52,8 @@ export default function RightSidebar({ gameState }: RightSidebarProps) {
                             .filter(p => p.ownerId === player.id)
                             .map(p => {
                                 const t = tiles[p.squareIndex];
-                                const level = parseInt(p.investmentLevel) || 1;
-                                const earn = 15; // Base return rate per owned property
+                                const level = p.investmentLevel || 'SEED';
+                                const earn = BASE_INCOME + p.bonusReturns;
                                 return { name: t.name, level, earn };
                             });
 
@@ -84,7 +98,7 @@ export default function RightSidebar({ gameState }: RightSidebarProps) {
                                             <div key={i} className="bg-white/30 px-3 py-2 rounded border-2 border-black/10 flex flex-col">
                                                 <span className="truncate">{t.name}</span>
                                                 <span className="text-[10px] opacity-70 uppercase mt-0.5">
-                                                    Level {t.level} • +{t.earn}/round
+                                                    {LEVEL_LABELS[t.level] || t.level} • +{t.earn}/round
                                                 </span>
                                             </div>
                                         ))}
@@ -95,6 +109,32 @@ export default function RightSidebar({ gameState }: RightSidebarProps) {
                     })}
                 </div>
             </div>
+
+            {/* ACTION BUTTONS SECTION */}
+            <div className="mt-auto pt-4 flex-none grid grid-cols-2 gap-2">
+                <button
+                    onClick={() => setShowSDGList(true)}
+                    className="col-span-2 bg-blue-600 hover:bg-blue-500 text-white border-[3px] border-black rounded-lg py-2 px-3 font-black text-sm uppercase tracking-wide flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                >
+                    <Target className="w-4 h-4" /> 17 UN SDGs
+                </button>
+                <button
+                    onClick={() => setShowGuide(true)}
+                    className="bg-yellow-400 hover:bg-yellow-300 text-black border-[3px] border-black rounded-lg py-2 px-2 font-black text-sm uppercase tracking-wide flex items-center justify-center gap-1 active:scale-95 transition-transform"
+                >
+                    <BookOpen className="w-4 h-4" /> Guide
+                </button>
+                <button
+                    onClick={handleLeaveGame}
+                    className="bg-gray-200 hover:bg-red-500 hover:text-white text-black border-[3px] border-black rounded-lg py-2 px-2 font-black text-sm uppercase tracking-wide flex items-center justify-center gap-1 active:scale-95 transition-colors transition-transform"
+                >
+                    <LogOut className="w-4 h-4" /> Leave
+                </button>
+            </div>
+
+            {/* MODALS */}
+            {showSDGList && <SDGListModal onClose={() => setShowSDGList(false)} />}
+            {showGuide && <QuickGuideModal onClose={() => setShowGuide(false)} />}
         </div>
     );
 }

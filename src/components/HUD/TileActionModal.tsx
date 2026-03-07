@@ -1,4 +1,5 @@
 import type { TileData } from "../../game/data/tiles";
+import { BUY_COST, UPGRADE_COST, EXPECTED_RETURN, LEVEL_LABELS } from "../../game/investRules";
 
 type TileActionModalProps = {
     tileData: TileData;
@@ -12,6 +13,8 @@ type TileActionModalProps = {
     onInvest: () => void;
     onPayRent: () => void;
     onPass: () => void;
+    onUpgrade: () => void;
+    investmentLevel: string;
 };
 
 export default function TileActionModal({
@@ -26,6 +29,8 @@ export default function TileActionModal({
     onInvest,
     onPayRent,
     onPass,
+    onUpgrade,
+    investmentLevel,
 }: TileActionModalProps) {
     const getBgColor = () => {
         if (!isProperty) return "#e5e7eb";
@@ -108,8 +113,13 @@ export default function TileActionModal({
                 {/* Pricing */}
                 {isProperty && (
                     <div className="text-center mb-2">
-                        <p className="text-lg font-black tracking-tight">COST: 50pts</p>
-                        <p className="text-[10px] font-bold uppercase text-black/70">EARN: 15 pts / round</p>
+                        <p className="text-lg font-black tracking-tight">COST: {isOwnedByMe ? (investmentLevel !== 'FLAGSHIP' ? `${UPGRADE_COST[investmentLevel]}pts` : 'MAX') : `${BUY_COST}pts`}</p>
+                        <p className="text-[10px] font-bold uppercase text-black/70">EARN: {EXPECTED_RETURN[isOwnedByMe ? investmentLevel : 'SEED']} pts / round</p>
+                        {isOwnedByMe && (
+                            <p className="text-[10px] font-bold uppercase text-black/70 mt-1">
+                                Level: {LEVEL_LABELS[investmentLevel] || investmentLevel}
+                            </p>
+                        )}
                     </div>
                 )}
 
@@ -132,17 +142,26 @@ export default function TileActionModal({
                                         SKIP
                                     </button>
                                 </>
-                            ) : !isOwnedByMe ? (
+                            ) : isOwnedByMe ? (
+                                investmentLevel !== 'FLAGSHIP' ? (
+                                    <button
+                                        className="w-full bg-[#3b82f6] text-white font-black text-lg border-4 border-black active:translate-y-1 active:border-b-0 transition-transform shadow-[inset_0_-4px_0_rgba(0,0,0,0.2)] rounded-lg"
+                                        onClick={onUpgrade}
+                                    >
+                                        UPGRADE ({UPGRADE_COST[investmentLevel]}pts)
+                                    </button>
+                                ) : (
+                                    <div className="w-full bg-emerald-500/30 flex items-center justify-center font-bold text-sm border-2 border-black/20 text-black/80 rounded-lg">
+                                        ⭐ MAX LEVEL
+                                    </div>
+                                )
+                            ) : (
                                 <button
                                     className="w-full bg-[#fb923c] text-white font-black text-lg border-4 border-black active:translate-y-1 active:border-b-0 transition-transform shadow-[inset_0_-4px_0_rgba(0,0,0,0.2)] rounded-lg"
                                     onClick={onPayRent}
                                 >
-                                    DONATE
+                                    DONATE 15
                                 </button>
-                            ) : (
-                                <div className="w-full bg-black/10 flex items-center justify-center font-bold text-sm border-2 border-black/20 text-black/60 rounded-lg">
-                                    YOUR PROPERTY
-                                </div>
                             )}
                         </div>
                     ) : (

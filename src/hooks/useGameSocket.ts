@@ -20,6 +20,7 @@ export interface GameState {
         roomCode: string;
         status: "WAITING" | "ACTIVE" | "FINISHED";
         currentRound: number;
+        maxRounds: number;
         currentTurnIdx: number;
         sdgClimate: number;
         sdgEducation: number;

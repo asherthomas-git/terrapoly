@@ -13,6 +13,7 @@ export default function Lobby({ socket, gameState }: LobbyProps) {
     const [roomCode, setRoomCode] = useState("");
     const [playerName, setPlayerName] = useState("");
     const [botPersonality, setBotPersonality] = useState<"Greedy" | "Eco-Warrior" | "Balanced">("Balanced");
+    const [maxRounds, setMaxRounds] = useState(15);
 
     useEffect(() => {
         // Ensure the player has a local ID
@@ -45,12 +46,20 @@ export default function Lobby({ socket, gameState }: LobbyProps) {
 
     const handleAddBot = () => {
         if (!gameState?.room?.roomCode) return;
+        if (gameState.players.length >= 4) {
+            alert("Room is full! Maximum 4 players allowed.");
+            return;
+        }
         socket.emit("add_bot", { roomCode: gameState.room.roomCode, botPersonality });
     };
 
     const handleStartGame = () => {
         if (!gameState?.room?.roomCode) return;
-        socket.emit("start_game", { roomCode: gameState.room.roomCode });
+        if (gameState.players.length < 2) {
+            alert("Game cannot start with a single player.");
+            return;
+        }
+        socket.emit("start_game", { roomCode: gameState.room.roomCode, maxRounds });
     };
 
     const handleKickPlayer = (targetPlayerId: string) => {
@@ -153,12 +162,24 @@ export default function Lobby({ socket, gameState }: LobbyProps) {
                     </div>
 
                     {isOwner ? (
-                        <button
-                            className="p-3 text-[20px] border-[3px] border-black rounded outline-none bg-[#ff90e8] font-bold cursor-pointer shadow-[4px_4px_0px_#000] transition-transform duration-100 hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_#000]"
-                            onClick={handleStartGame}
-                        >
-                            Start Game <Rocket className="inline-block ml-2" size={24} />
-                        </button>
+                        <div className="flex flex-col gap-2 border-[3px] border-black p-3 bg-white shadow-[4px_4px_0px_#000] rounded">
+                            <label className="font-bold flex justify-between items-center text-sm">
+                                Max Rounds:
+                                <input
+                                    type="number"
+                                    className="p-1 w-16 border-2 border-black rounded text-center font-bold outline-none"
+                                    value={maxRounds}
+                                    onChange={(e) => setMaxRounds(Math.max(1, parseInt(e.target.value) || 15))}
+                                    min="1"
+                                />
+                            </label>
+                            <button
+                                className="p-3 mt-1 text-[20px] border-[3px] border-black rounded outline-none bg-[#ff90e8] font-bold cursor-pointer shadow-[2px_2px_0px_#000] hover:translate-y-[2px] transition-transform active:translate-y-[2px] active:shadow-none"
+                                onClick={handleStartGame}
+                            >
+                                Start Game <Rocket className="inline-block ml-2" size={24} />
+                            </button>
+                        </div>
                     ) : (
                         <div className="p-3 text-center text-base border-[3px] border-black/20 rounded bg-gray-100 text-gray-500 font-bold">
                             Waiting for host to start...
