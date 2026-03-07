@@ -8,7 +8,7 @@ export default function LogPanel() {
 
 const panelBase: React.CSSProperties = {
   background: "rgba(255,255,255,0.06)",
-  borderRadius: "12px",
+//   borderRadius: "12px",
   border: "1px solid rgba(255,255,255,0.08)",
   padding: "20px",
   color: "white",
@@ -19,8 +19,9 @@ const panelBase: React.CSSProperties = {
 
 const panelBottom: React.CSSProperties = {
   ...panelBase,
-  flex: 1,
-  margin: "16px"
+  width: "80%",
+  height: "30%"
+
 }
 
 const panelTitle: React.CSSProperties = {

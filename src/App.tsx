@@ -1,7 +1,8 @@
+import { useState } from "react"
 import Board from "./components/Board/Board"
 import { BOARD_SIZE } from "./game/board/constants"
-
-
+import { tiles } from "./game/data/tiles"
+import { initialPlayers } from "./game/player/players"
 
 import PropertyPanel from "./components/panels/PropertyPanel"
 import LogPanel from "./components/panels/LogPanel"
@@ -9,6 +10,33 @@ import GlobalScorePanel from "./components/panels/GlobalScorePanel"
 import CurrentScorePanel from "./components/panels/CurrentScorePanel"
 
 export default function App() {
+  // 🧠 GAME STATE LIFTED HERE
+  const [players, setPlayers] = useState(initialPlayers)
+  const [currentTurn, setCurrentTurn] = useState(0)
+
+  const currentPlayer = players[currentTurn]
+
+  // 💰 Earnings per level
+  const getEarning = (level: number) => {
+    if (level === 1) return 10
+    if (level === 2) return 25
+    if (level === 3) return 60
+    return 0
+  }
+
+  // 🏗 Owned properties detailed view
+  const ownedTilesDetailed = currentPlayer.ownedTiles.map(t => {
+    const tileInfo = tiles[t.tileId]
+    return {
+      name: tileInfo.name,
+      level: t.level,
+      earn: getEarning(t.level)
+    }
+  })
+
+  // 📈 Total return rate
+  const returnRate = ownedTilesDetailed.reduce((sum, t) => sum + t.earn, 0)
+
   return (
     <div style={pageLayout}>
       {/* LEFT PANEL */}
@@ -18,12 +46,22 @@ export default function App() {
       </div>
 
       {/* GAME BOARD */}
-      <Board />
+      <Board
+        players={players}
+        setPlayers={setPlayers}
+        currentTurn={currentTurn}
+        setCurrentTurn={setCurrentTurn}
+      />
 
       {/* RIGHT PANEL */}
       <div style={sidePanelStyle}>
         <GlobalScorePanel />
-        <CurrentScorePanel />
+
+        <CurrentScorePanel
+          impactPoints={currentPlayer.impactPoints}
+          returnRate={returnRate}
+          ownedTiles={ownedTilesDetailed}
+        />
       </div>
     </div>
   )
@@ -42,7 +80,10 @@ const sidePanelStyle: React.CSSProperties = {
   height: BOARD_SIZE,
   display: "flex",
   flexDirection: "column",
-
+  boxSizing: "border-box",
+  padding: 24,
+  justifyContent: "space-around",
+  alignItems: "center",
   background: "rgba(29, 50, 80, 0.8)",
   backdropFilter: "blur(24px)",
   WebkitBackdropFilter: "blur(12px)",

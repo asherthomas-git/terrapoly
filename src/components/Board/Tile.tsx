@@ -4,51 +4,40 @@ import type { TileData } from "../../game/data/tiles";
 type Props = {
   tile: LayoutTile;
   data: TileData;
+  ownerId?: number;
+  level?: number;
 };
 
-export default function Tile({ tile, data }: Props) {
-  let rotation = "rotate(0deg)";
-
-  if (tile.side === "left") rotation = "rotate(90deg)";
-  if (tile.side === "right") rotation = "rotate(-90deg)";
-
-  // position the flag toward the inner edge of the board
-  const flagPosition: Record<string, React.CSSProperties> = {
-    bottom: { top: -10, left: "50%", transform: "translateX(-50%)" },
-    top: { bottom: -10, left: "50%", transform: "translateX(-50%)" },
-    left: { right: -10, top: "50%", transform: "translateY(-50%)" },
-    right: { left: -10, top: "50%", transform: "translateY(-50%)" },
-  };
-
-  // position price tag toward outer edge of board
-  const pricePosition: Record<string, React.CSSProperties> = {
-    bottom: { bottom: 6, left: "50%", transform: "translateX(-50%)" },
-    top: { top: 6, left: "50%", transform: "translateX(-50%)" },
-    left: { left: -8, top: "50%", transform: "translateY(-50%) rotate(90deg)" },
-    right: { right: -8, top: "50%", transform: "translateY(-50%) rotate(-90deg)" },
-  };
-
-  const namePosition: Record<string, React.CSSProperties> = {
-    bottom: { justifyContent: "flex-start", paddingTop: 32 },
-    top: { justifyContent: "flex-end", paddingBottom: 32 },
-    left: { justifyContent: "flex-start", paddingTop: 6 },
-    right: { justifyContent: "flex-start", paddingTop: 6 }
-  };
-
+export default function Tile({ tile, data, ownerId }: Props) {
   const isProperty = data.type === "property";
+  const isCorner = ["start", "jail", "goToJail", "parking"].includes(data.type || "");
+  const isEdgeTile = !isCorner;
+  const isSideTile = tile.side === "left" || tile.side === "right";
 
-  const isSpecial =
-    data.type === "chance" ||
-    data.type === "treasure" ||
-    data.type === "airport" ||
-    data.type === "utility" ||
-    data.type === "tax";
+  let textRotation = "0deg";
+  if (tile.side === "left") textRotation = "-90deg";
+  if (tile.side === "right") textRotation = "90deg";
 
-  const isCorner =
-    data.type === "start" ||
-    data.type === "jail" ||
-    data.type === "goToJail" ||
-    data.type === "parking";
+  const containerDirection = isSideTile ? "row" : "column";
+  const stripOrder = (tile.side === "top" || tile.side === "left") ? 0 : 1;
+  const bodyOrder = stripOrder === 0 ? 1 : 0;
+  const stripSize = 28;
+
+  const playerColors = ["#ffffff", "#C6D63A", "#D96AA6", "#E71C1C"];
+  const borderColor = "#0e1621"; // Define your border color here
+
+  const stripColor =
+    ownerId !== undefined
+      ? playerColors[ownerId % playerColors.length]
+      : (data.cat || "#0f2f1f");
+
+  const getAlignment = () => {
+    if (tile.side === "bottom") return { justifyContent: "flex-start" };
+    if (tile.side === "top") return { justifyContent: "flex-end" };
+    if (tile.side === "left") return { justifyContent: "flex-end" };
+    if (tile.side === "right") return { justifyContent: "flex-start" };
+    return { justifyContent: "center" };
+  };
 
   return (
     <div
@@ -58,113 +47,80 @@ export default function Tile({ tile, data }: Props) {
         top: tile.y,
         width: tile.width,
         height: tile.height,
-        borderRadius: "12px",
-
-        background: "rgba(48, 86, 136, 0.64)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
-
-        border: "1px solid rgba(35, 90, 178, 0.15)",
-        boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
-
-        boxSizing: "border-box",
         display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-
+        flexDirection: containerDirection,
+        boxSizing: "border-box",
+        overflow: "hidden",
+        background: "#1f3b5b",
         color: "white",
-        overflow: "visible",
+        // FIX: Replaced 'border' with 'boxShadow inset' to prevent doubling
+        boxShadow: `inset 0 0 0 2px ${borderColor}`,
       }}
     >
-      {/* PROPERTY FLAG ICON */}
-      {isProperty && data.icon && (
-        <img
-          src={data.icon}
-          alt=""
-          style={{
-            position: "absolute",
-            width: 24,
-            height: 24,
-            borderRadius: "50%",
-            objectFit: "cover",
-            border: "1px solid rgba(255, 255, 255, 0.6)",
-            background: "white",
-            zIndex: 5,
-            ...flagPosition[tile.side],
-          }}
-        />
-      )}
-
-      {/* PRICE TAG */}
-      {isProperty && data.sdgno && (
+      {/* SDG STRIP */}
+      {isEdgeTile && isProperty && (
         <div
           style={{
-            color: "#00ffaa",
-            position: "absolute",
-            width: 36,
-            textAlign: "center",
-            fontSize: 10,
-            fontFamily: "Nunito",
-            opacity: 0.85,
-            background: "rgba(255,255,255,0.15)",
-            padding: "2px 6px",
-            borderRadius: 6,
-            ...pricePosition[tile.side],
-
+            order: stripOrder,
+            width: isSideTile ? stripSize : "100%",
+            height: isSideTile ? "100%" : stripSize,
+            background: stripColor,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+            // FIX: Using inset shadow for the internal divider too
+            boxShadow: `inset 0 0 0 1px ${borderColor}`,
           }}
         >
-          {data.sdgno}
+          {data.sdgno && (
+            <div style={{
+              transform: isSideTile ? (tile.side === "left" ? "rotate(-90deg)" : "rotate(90deg)") : "none",
+              fontSize: 10,
+              fontFamily: "ITCKabel",
+              color: "black",
+              fontWeight: 800,
+              border: "1px solid white",
+              padding: "1px 6px",
+              borderRadius: "10px",
+              whiteSpace: "nowrap",
+              backgroundColor: "rgba(255,255,255,0.2)"
+            }}>
+              {data.sdgno}
+            </div>
+          )}
         </div>
       )}
 
-      {/* SPECIAL TILE ICON */}
-      {isSpecial && data.icon && (
-        <img
-          src={data.icon}
-          alt=""
-          style={{
-            width: 28,
-            height: 28,
-            objectFit: "contain",
-          }}
-        />
-      )}
-
-      {/* CORNER TILE ICON */}
-      {isCorner && data.icon && (
-        <img
-          src={data.icon}
-          alt=""
-          style={{
-            width: 42,
-            height: 42,
-            objectFit: "contain",
-          }}
-        />
-      )}
-
+      {/* MAIN BODY */}
       <div
         style={{
-          transform: rotation,
-          textAlign: "center",
-          fontSize: 12,
-          fontFamily: "Nunito",
+          order: bodyOrder,
+          flex: 1,
           display: "flex",
-          flexDirection: "column",
+          flexDirection: isSideTile ? "row" : "column",
           alignItems: "center",
-          gap: 3,
-          width:
-            tile.side === "left" || tile.side === "right"
-              ? tile.height
-              : "100%",
-          height: "100%",
-          padding: "0 4px",
-          wordBreak: "normal",
-          overflowWrap: "break-word",
-          ...namePosition[tile.side],
+          padding: isSideTile ? "0 8px" : "8px 0",
+          background: data.catsec || "#1f3b5b",
+          // FIX: Inset shadow ensures names don't overlap the tile edges
+          boxShadow: `inset 0 0 0 1px ${borderColor}`,
+          ...getAlignment(),
         }}
       >
-        <div>{data.name}</div>
+        <div
+          style={{
+            transform: `rotate(${textRotation})`,
+            fontSize: 11,
+            fontWeight: 800,
+            color: "black",
+            fontFamily: "ITCKabel, sans-serif",
+            textAlign: "center",
+            lineHeight: 1.1,
+            width: isSideTile ? tile.height - 10 : "100%",
+          }}
+        >
+          {data.name}
+        </div>
       </div>
     </div>
   );

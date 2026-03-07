@@ -27,10 +27,10 @@ export default function PlayerToken({
 
   // 🎨 Different colors per player
   const playerColors = [
-    "radial-gradient(circle at 35% 35%, #ff5e5e 0%, #e62e2e 100%)", // Player 1 — Red
-    "radial-gradient(circle at 35% 35%, #5ea1ff 0%, #2e6fe6 100%)", // Player 2 — Blue
-    "radial-gradient(circle at 35% 35%, #5eff9b 0%, #2ee67a 100%)", // Player 3 — Green
-    "radial-gradient(circle at 35% 35%, #ffd45e 0%, #e6b82e 100%)", // Player 4 — Yellow
+    "radial-gradient(circle at 35% 35%, #ffffff 0%, #ababab 100%)", // Player 1 — Red
+    "radial-gradient(circle at 35% 35%, #C6D63A 0%, #c1cd54 100%)", // Player 2 — Blue
+    "radial-gradient(circle at 35% 35%, #D96AA6 0%, #d1639e 100%)", // Player 3 — Green
+    "radial-gradient(circle at 35% 35%, #E71C1C 0%, #b33434 100%)", // Player 4 — Yellow
   ]
 
   const tokenColor = playerColors[playerIndex % playerColors.length]

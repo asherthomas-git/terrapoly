@@ -1,11 +1,11 @@
-
 body {
   margin: 0;
   padding: 0;
   height: 100vh;
- 
-  background-image: url("/background.png");
-  /* background-color: black; */
+  font-family: "ITCKabel";
+  /* Adds a 50% black overlay. Adjust 0.5 to change darkness */
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(46, 63, 31, 0.5)), url("/background.png");
+  
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -14,3 +14,19 @@ body {
   justify-content: center;
   align-items: center;
 }
+
+@font-face {
+  font-family: "ITCKabel"; /* The name you will use in your code */
+  src: url("../public/itc-kabel-std/ITCKabelStdBook.TTF") format("truetype"); /* Path to the file */
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "ITCKabelB"; /* The name you will use in your code */
+  src: url("../public/itc-kabel-std/ITCKabelStdBold.TTF") format("truetype"); /* Path to the file */
+  font-weight: normal;
+  font-style: normal;
+}
+
+
