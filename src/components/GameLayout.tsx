@@ -7,6 +7,7 @@ import RightSidebar from "./HUD/RightSidebar";
 import TileActionModal from "./HUD/TileActionModal";
 import HeadlineModal from "./HUD/HeadlineModal";
 import CrisisModal from "./HUD/CrisisModal";
+import PeoplesVoiceOverlay from "./HUD/PeoplesVoiceOverlay";
 
 import { tiles } from "../game/data/tiles";
 import { BASE_INCOME } from "../game/investRules";
@@ -396,6 +397,15 @@ export default function GameLayout({ socket, gameState }: GameLayoutProps) {
             {/* ═══════════════════════════════════════════════ */}
             {/* EVENT MODALS (Desktop & Mobile)                 */}
             {/* ═══════════════════════════════════════════════ */}
+            <PeoplesVoiceOverlay
+                socket={socket}
+                gameState={gameState}
+                myPlayerId={myPlayerId}
+                onClose={() => {
+                    // Closed PeoplesVoiceOverlay
+                }}
+            />
+
             {activeHeadline && activeHeadline.playerId === myPlayerId && (
                 <HeadlineModal
                     headline={activeHeadline.headline}

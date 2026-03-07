@@ -7,7 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || `http://${window.location.hostname}:3001`;
 const socket: Socket = io(BACKEND_URL);
 
-export type TurnPhase = 'WAITING_FOR_ROLL' | 'WAITING_FOR_ACTION' | 'TURN_ENDING';
+export type TurnPhase = 'WAITING_FOR_ROLL' | 'WAITING_FOR_ACTION' | 'WAITING_FOR_PEOPLES_VOICE_CHOICE' | 'WAITING_FOR_VOTES' | 'TURN_ENDING';
 
 export interface LogEntry {
     message: string;
@@ -50,6 +50,10 @@ export interface GameState {
     turnPhase: TurnPhase;
     ownerId: string | null;
     logs: LogEntry[];
+    peoplesVoiceVote?: {
+        votes: Record<string, string>;
+        required: number;
+    };
 }
 
 export const useGameSocket = () => {
